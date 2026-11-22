@@ -90,8 +90,8 @@ This updates this README and your profile README.
 
 **Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)
 
-**Updated**: 2026-11-16 06:02 UTC  
-**Total**: 33 repos (0 private / 33 public)
+**Updated**: 2026-11-22 14:35 UTC  
+**Total**: 36 repos (0 private / 36 public)
 
 ---
 
@@ -135,10 +135,13 @@ This updates this README and your profile README.
 | [HTL2910](https://github.com/HTL2910/HTL2910) | - | 2026-11-10 | 0 | 🌐 | Config files for my GitHub profile. |
 | [Power-BI](https://github.com/HTL2910/Power-BI) | - | 2024-08-21 | 0 | 🌐 | Hoc Power BI |
 
-## 🤖 AI / ML (8)
+## 🤖 AI / ML (11)
 
 | Repo | Language | Updated | Stars | Visibility | Description |
 |------|----------|---------|-------|------------|-------------|
+| [muse-1-vn-address-autofill](https://github.com/HTL2910/muse-1-vn-address-autofill) | Python | 2026-11-22 | 0 | 🌐 | Muse Company · nhiệm vụ #1: tôi có một bài toán như này : mộ |
+| [muse-2-multi-account-video-stats](https://github.com/HTL2910/muse-2-multi-account-video-stats) | Python | 2026-11-22 | 0 | 🌐 | MuseAssistantTeam · #2: multi-account-video-stats — hệ thống |
+| [laya_address_vn](https://github.com/HTL2910/laya_address_vn) | Python | 2026-11-22 | 0 | 🌐 | Laya Address VN: Browser ONNX & CPU Backend Vietnamese Addre |
 | [hypit](https://github.com/HTL2910/hypit) | - | 2026-10-05 | 0 | 🌐 | Clone any viral video with AI agents. Not just a script, the |
 | [Full-Stack-Data-Science---Machine-Learning-BootCamp-Course](https://github.com/HTL2910/Full-Stack-Data-Science---Machine-Learning-BootCamp-Course) | Jupyter Notebook | 2026-09-25 | 0 | 🌐 | Learn Udemy Full Stack Data Science & Machine Learning BootC |
 | [shorts](https://github.com/HTL2910/shorts) | Python | 2026-09-10 | 0 | 🌐 | 🎥 AI Youtube Shorts video generator using Gemini API for ima |
