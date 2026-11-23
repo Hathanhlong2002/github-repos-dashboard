@@ -90,15 +90,17 @@ This updates this README and your profile README.
 
 **Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)
 
-**Updated**: 2026-11-22 14:35 UTC  
-**Total**: 36 repos (0 private / 36 public)
+**Updated**: 2026-11-23 07:14 UTC  
+**Total**: 39 repos (0 private / 39 public)
 
 ---
 
-## 🌐 Web / Frontend (4)
+## 🌐 Web / Frontend (6)
 
 | Repo | Language | Updated | Stars | Visibility | Description |
 |------|----------|---------|-------|------------|-------------|
+| [FPS-Zombie-Suong-Mu](https://github.com/HTL2910/FPS-Zombie-Suong-Mu) | JavaScript | 2026-11-22 | 0 | 🌐 | FPS Zombie Sương Mù v6.5 — 3D WebGL/Three.js Survival Horror |
+| [Dungeon-Survivor-3D](https://github.com/HTL2910/Dungeon-Survivor-3D) | JavaScript | 2026-11-22 | 0 | 🌐 | Dungeon Survivor 3D — WebGL/Three.js Action Survivor with 26 |
 | [github-repos-dashboard](https://github.com/HTL2910/github-repos-dashboard) | HTML | 2026-11-10 | 1 | 🌐 | Automated overview & manager for all personal GitHub reposit |
 | [AWS-AI-chatbot](https://github.com/HTL2910/AWS-AI-chatbot) | TypeScript | 2026-11-04 | 0 | 🌐 |   SafeGraph AI - VS Code AI coding assistant with Amazon Bed |
 | [bang-cards-deck](https://github.com/HTL2910/bang-cards-deck) | TypeScript | 2026-11-01 | 0 | 🌐 | - |
@@ -135,10 +137,11 @@ This updates this README and your profile README.
 | [HTL2910](https://github.com/HTL2910/HTL2910) | - | 2026-11-10 | 0 | 🌐 | Config files for my GitHub profile. |
 | [Power-BI](https://github.com/HTL2910/Power-BI) | - | 2024-08-21 | 0 | 🌐 | Hoc Power BI |
 
-## 🤖 AI / ML (11)
+## 🤖 AI / ML (12)
 
 | Repo | Language | Updated | Stars | Visibility | Description |
 |------|----------|---------|-------|------------|-------------|
+| [muse-3-vn-realtime-voice-agent](https://github.com/HTL2910/muse-3-vn-realtime-voice-agent) | Python | 2026-11-22 | 0 | 🌐 | MuseAssistantTeam #3: vn-realtime-voice-agent — AI trợ lý gi |
 | [muse-1-vn-address-autofill](https://github.com/HTL2910/muse-1-vn-address-autofill) | Python | 2026-11-22 | 0 | 🌐 | Muse Company · nhiệm vụ #1: tôi có một bài toán như này : mộ |
 | [muse-2-multi-account-video-stats](https://github.com/HTL2910/muse-2-multi-account-video-stats) | Python | 2026-11-22 | 0 | 🌐 | MuseAssistantTeam · #2: multi-account-video-stats — hệ thống |
 | [laya_address_vn](https://github.com/HTL2910/laya_address_vn) | Python | 2026-11-22 | 0 | 🌐 | Laya Address VN: Browser ONNX & CPU Backend Vietnamese Addre |
