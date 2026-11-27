@@ -792,10 +792,10 @@ def generate_readme(repos, profile=None):
     prof = sanitize_profile(profile, OWNER, public)
     display_name = (prof.get("name") or OWNER).strip()
 
-    workflow_rel = "../../actions/workflows/update-dashboard.yml"
-    actions_rel = "../../actions"
-    secrets_rel = "../../settings/secrets/actions"
-    pages_settings_rel = "../../settings/pages"
+    workflow_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions/workflows/update-dashboard.yml"
+    actions_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions"
+    secrets_url = f"https://github.com/{OWNER}/{REPO_NAME}/settings/secrets/actions"
+    pages_settings_url = f"https://github.com/{OWNER}/{REPO_NAME}/settings/pages"
     token_url = "https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard"
     pages_url = f"https://{OWNER}.github.io/{REPO_NAME}/"
     profile_view_url = f"https://github.com/{OWNER}/{OWNER}"
@@ -810,12 +810,12 @@ def generate_readme(repos, profile=None):
         "",
         f"[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)]({pages_url}) "
         f"[![View Profile](https://img.shields.io/badge/Profile_{_shields_escape(OWNER)}-1E293B?style=for-the-badge&logo=github&logoColor=white)]({profile_view_url}) "
-        f"[![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_rel})",
+        f"[![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_url})",
         "",
         f"**Web Dashboard**: [{pages_url}]({pages_url})  ",
         f"**Updated**: `{now}`  ",
         f"**Total**: **{total} repos** (`{public}` public · `{private}` private)  ",
-        "<sub>Forking this repo? Jump to the <a href=\"#setup-guide\">Setup Guide</a> below — all links automatically target your fork.</sub>",
+        "<sub>Forking this repo? Jump to the <a href=\"#setup-guide\">Setup Guide</a> below — use the <strong>Actions</strong> &amp; <strong>Settings</strong> tabs at the top of your fork for the first run, then all links auto-update to your repo.</sub>",
         "",
         "## ✨ Features",
         "",
@@ -875,20 +875,20 @@ def generate_readme(repos, profile=None):
         "<details>",
         "<summary><strong>🚀 Detailed Setup Guide (for forked users)</strong></summary>",
         "",
-        "> **Fork-safe links**: Every Actions, Secrets, and Pages button below uses repo-relative links, so they point directly to **your fork** even before the first workflow run.",
+        "> **Note for forked users**: For your very first setup, open the **Actions** and **Settings** tabs at the top of **your own fork** (GitHub Markdown strips relative links out of `/blob/...`). Once you run Step 4, every badge URL below automatically updates to your username and repository.",
         "",
         "### 1. Enable GitHub Actions on your fork",
         "",
-        f"[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)]({actions_rel})",
+        f"[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)]({actions_url})",
         "",
-        "1. Click **I understand my workflows, go ahead and enable them** (required on forks)",
+        "1. Open the **Actions** tab on your fork and click **I understand my workflows, go ahead and enable them**",
         "2. Confirm **Update Repos Dashboard** is enabled in the left sidebar",
         "",
         "### 2. Enable GitHub Pages (before first run)",
         "",
-        f"[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)]({pages_settings_rel})",
+        f"[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)]({pages_settings_url})",
         "",
-        "1. Under **Build and deployment**, select Source: **GitHub Actions**",
+        "1. Open **Settings → Pages** on your fork and under **Build and deployment**, select Source: **GitHub Actions**",
         "2. The `Deploy to GitHub Pages` workflow packages only `index.html` and `data/dashboard.json` into `_site/` (never exposing `scripts/` or `README.md`)",
         "",
         "### 3. (Optional) Enable Private Repos & Profile README Sync",
@@ -899,12 +899,12 @@ def generate_readme(repos, profile=None):
         "   - Repository name must match **your exact GitHub username** · Visibility: **Public**",
         f"2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)]({token_url})",
         "   - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token",
-        f"3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)]({secrets_rel})",
-        "   - Name: `PERSONAL_ACCESS_TOKEN` · Value: paste your token",
+        f"3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)]({secrets_url})",
+        "   - In **Settings → Secrets and variables → Actions** on your fork, add `PERSONAL_ACCESS_TOKEN` and paste your token",
         "",
         "### 4. Run the dashboard workflow",
         "",
-        f"[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)]({workflow_rel})",
+        f"[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)]({workflow_url})",
         "",
         "Click **Run workflow** → updates `README.md`, `data/dashboard.json`, and your profile README (auto-detecting `main`/`master`), then automatically deploys GitHub Pages.",
         "",

@@ -2,12 +2,12 @@
 
 Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data/dashboard.json`), minimal private-repo listing (name + purpose only), and adaptive light/dark Profile README sync.
 
-[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://HTL2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](../../actions/workflows/update-dashboard.yml)
+[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://HTL2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/HTL2910/github-repos-dashboard/actions/workflows/update-dashboard.yml)
 
 **Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)  
 **Updated**: `2026-11-27 09:44 UTC`  
 **Total**: **78 repos** (`43` public · `35` private)  
-<sub>Forking this repo? Jump to the <a href="#setup-guide">Setup Guide</a> below — all links automatically target your fork.</sub>
+<sub>Forking this repo? Jump to the <a href="#setup-guide">Setup Guide</a> below — use the <strong>Actions</strong> &amp; <strong>Settings</strong> tabs at the top of your fork for the first run, then all links auto-update to your repo.</sub>
 
 ## ✨ Features
 
@@ -135,20 +135,20 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 <details>
 <summary><strong>🚀 Detailed Setup Guide (for forked users)</strong></summary>
 
-> **Fork-safe links**: Every Actions, Secrets, and Pages button below uses repo-relative links, so they point directly to **your fork** even before the first workflow run.
+> **Note for forked users**: For your very first setup, open the **Actions** and **Settings** tabs at the top of **your own fork** (GitHub Markdown strips relative links out of `/blob/...`). Once you run Step 4, every badge URL below automatically updates to your username and repository.
 
 ### 1. Enable GitHub Actions on your fork
 
-[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)](../../actions)
+[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/actions)
 
-1. Click **I understand my workflows, go ahead and enable them** (required on forks)
+1. Open the **Actions** tab on your fork and click **I understand my workflows, go ahead and enable them**
 2. Confirm **Update Repos Dashboard** is enabled in the left sidebar
 
 ### 2. Enable GitHub Pages (before first run)
 
-[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)](../../settings/pages)
+[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/settings/pages)
 
-1. Under **Build and deployment**, select Source: **GitHub Actions**
+1. Open **Settings → Pages** on your fork and under **Build and deployment**, select Source: **GitHub Actions**
 2. The `Deploy to GitHub Pages` workflow packages only `index.html` and `data/dashboard.json` into `_site/` (never exposing `scripts/` or `README.md`)
 
 ### 3. (Optional) Enable Private Repos & Profile README Sync
@@ -159,12 +159,12 @@ Skip this step if you only want a public repos dashboard. To include private rep
    - Repository name must match **your exact GitHub username** · Visibility: **Public**
 2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)](https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard)
    - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token
-3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)](../../settings/secrets/actions)
-   - Name: `PERSONAL_ACCESS_TOKEN` · Value: paste your token
+3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/settings/secrets/actions)
+   - In **Settings → Secrets and variables → Actions** on your fork, add `PERSONAL_ACCESS_TOKEN` and paste your token
 
 ### 4. Run the dashboard workflow
 
-[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)](../../actions/workflows/update-dashboard.yml)
+[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/actions/workflows/update-dashboard.yml)
 
 Click **Run workflow** → updates `README.md`, `data/dashboard.json`, and your profile README (auto-detecting `main`/`master`), then automatically deploys GitHub Pages.
 
