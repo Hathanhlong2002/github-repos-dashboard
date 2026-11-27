@@ -432,7 +432,32 @@ def _adaptive_picture(dark_src: str, light_src: str, alt: str, height: int | Non
     )
 
 
-def generate_profile_readme(repos, profile=None):
+def _url_exists(url: str) -> bool:
+    try:
+        resp = requests.head(url, timeout=5, allow_redirects=True)
+        return resp.status_code == 200
+    except requests.RequestException:
+        return False
+
+
+def _resolve_snake_urls(owner: str, include_snake: bool | None = None):
+    snake_dark = f"https://raw.githubusercontent.com/{owner}/{owner}/output/github-contribution-grid-snake-dark.svg"
+    snake_light = f"https://raw.githubusercontent.com/{owner}/{owner}/output/github-contribution-grid-snake.svg"
+    if include_snake is False:
+        return None
+    if include_snake is True:
+        return (snake_dark, snake_light)
+    has_light = _url_exists(snake_light)
+    has_dark = _url_exists(snake_dark)
+    if not has_light and not has_dark:
+        return None
+    return (
+        snake_dark if has_dark else snake_light,
+        snake_light if has_light else snake_dark,
+    )
+
+
+def generate_profile_readme(repos, profile=None, include_snake: bool | None = None):
     now_dt = datetime.now(timezone.utc)
     now = now_dt.strftime("%Y-%m-%d")
     public_repos, private_repos = split_repos(repos)
@@ -542,8 +567,7 @@ def generate_profile_readme(repos, profile=None):
         f"https://github-profile-trophy.vercel.app/?username={OWNER}"
         f"&theme=flat&no-frame=true&no-bg=true&row=1&column=6&margin-w=6&cache_bust={cache_bust}"
     )
-    snake_dark = f"https://raw.githubusercontent.com/{OWNER}/{OWNER}/output/github-contribution-grid-snake-dark.svg"
-    snake_light = f"https://raw.githubusercontent.com/{OWNER}/{OWNER}/output/github-contribution-grid-snake.svg"
+    snake_urls = _resolve_snake_urls(OWNER, include_snake=include_snake)
 
     language_badges = build_toolchain_badges(public_repos)
     tech_badges = detect_tech_stack_badges(public_repos)
@@ -639,7 +663,7 @@ def generate_profile_readme(repos, profile=None):
 
     lines.extend([
         "",
-        f"<sub>👉 <a href=\"{dashboard_url}\">Xem toàn bộ {len(public_repos)} public repos, biểu đồ & Knowledge Graph trên Dashboard</a></sub>",
+        f"<sub>👉 <a href=\"{dashboard_url}\">Explore all {len(public_repos)} public repos, charts &amp; interactive Knowledge Graph on the Web Dashboard</a></sub>",
     ])
 
     if private_repos:
@@ -647,8 +671,8 @@ def generate_profile_readme(repos, profile=None):
             "",
             f"### 🔒 Private Projects ({len(private_repos)})",
             "",
-            "| Repo | Tác dụng |",
-            "|------|----------|",
+            "| Repo | Purpose |",
+            "|------|---------|",
         ])
         for r in private_repos:
             name = r["name"].replace("|", "/")
@@ -667,14 +691,22 @@ def generate_profile_readme(repos, profile=None):
         '<p align="center">',
         f'  {_adaptive_picture(trophies_dark, trophies_light, "GitHub Trophies")}',
         "</p>",
-        "",
-        "### 🐍 Contribution Activity",
-        "",
-        '<div align="center">',
-        "",
-        _adaptive_picture(snake_dark, snake_light, "Contribution snake"),
-        "",
-        "</div>",
+    ])
+
+    if snake_urls:
+        snake_dark, snake_light = snake_urls
+        lines.extend([
+            "",
+            "### 🐍 Contribution Activity",
+            "",
+            '<div align="center">',
+            "",
+            _adaptive_picture(snake_dark, snake_light, "Contribution snake"),
+            "",
+            "</div>",
+        ])
+
+    lines.extend([
         "",
         "---",
         "",
@@ -690,12 +722,30 @@ def generate_profile_readme(repos, profile=None):
     return "\n".join(lines)
 
 
+def _get_profile_repo_default_branch(owner: str) -> str | None:
+    url = f"https://api.github.com/repos/{owner}/{owner}"
+    resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+    if resp.status_code == 404:
+        print(
+            f"Profile repo {owner}/{owner} not found; create a public repo named '{owner}' to enable profile README sync"
+        )
+        return None
+    if resp.status_code == 200:
+        return resp.json().get("default_branch") or "main"
+    print(f"Could not read default branch for {owner}/{owner} ({resp.status_code}), falling back to 'main'")
+    return "main"
+
+
 def update_profile_readme(content: str):
     if not PERSONAL_TOKEN:
         print("No PERSONAL_ACCESS_TOKEN set, skip profile update")
         return
+    branch = _get_profile_repo_default_branch(OWNER)
+    if not branch:
+        return
+
     url = f"https://api.github.com/repos/{OWNER}/{OWNER}/contents/README.md"
-    resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+    resp = requests.get(url, headers=HEADERS, params={"ref": branch}, timeout=REQUEST_TIMEOUT)
     sha = None
     if resp.status_code == 200:
         sha = resp.json().get("sha")
@@ -703,14 +753,14 @@ def update_profile_readme(content: str):
     payload = {
         "message": "chore: auto-update dynamic profile",
         "content": base64.b64encode(content.encode()).decode(),
-        "branch": "main"
+        "branch": branch,
     }
     if sha:
         payload["sha"] = sha
 
     put = requests.put(url, headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
     if put.status_code in (200, 201):
-        print("Profile README updated successfully")
+        print(f"Profile README updated successfully on branch '{branch}'")
     else:
         print(f"Profile update failed: {put.status_code} - {put.text[:300]}")
 
@@ -742,15 +792,14 @@ def generate_readme(repos, profile=None):
     prof = sanitize_profile(profile, OWNER, public)
     display_name = (prof.get("name") or OWNER).strip()
 
-    workflow_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions/workflows/update-dashboard.yml"
+    workflow_rel = "../../actions/workflows/update-dashboard.yml"
+    actions_rel = "../../actions"
+    secrets_rel = "../../settings/secrets/actions"
+    pages_settings_rel = "../../settings/pages"
     token_url = "https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard"
-    secrets_url = f"https://github.com/{OWNER}/{REPO_NAME}/settings/secrets/actions"
-    pages_settings_url = f"https://github.com/{OWNER}/{REPO_NAME}/settings/pages"
     pages_url = f"https://{OWNER}.github.io/{REPO_NAME}/"
-    profile_repo_url = f"https://github.com/new?name={OWNER}&description=Profile+README"
     profile_view_url = f"https://github.com/{OWNER}/{OWNER}"
     profile_actions_url = f"https://github.com/{OWNER}/{OWNER}/actions"
-    actions_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions"
 
     cat_counts = Counter(categorize_key(r) for r in public_repos)
 
@@ -761,19 +810,20 @@ def generate_readme(repos, profile=None):
         "",
         f"[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)]({pages_url}) "
         f"[![View Profile](https://img.shields.io/badge/Profile_{_shields_escape(OWNER)}-1E293B?style=for-the-badge&logo=github&logoColor=white)]({profile_view_url}) "
-        f"[![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_url})",
+        f"[![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_rel})",
         "",
         f"**Web Dashboard**: [{pages_url}]({pages_url})  ",
         f"**Updated**: `{now}`  ",
-        f"**Total**: **{total} repos** (`{public}` public · `{private}` private)",
+        f"**Total**: **{total} repos** (`{public}` public · `{private}` private)  ",
+        "<sub>Forking this repo? Jump to the <a href=\"#setup-guide\">Setup Guide</a> below — all links automatically target your fork.</sub>",
         "",
         "## ✨ Features",
         "",
         "- **Unified Categorization**: `scripts/update_dashboard.py` and `index.html` share identical priority rules (`topics → keyword tokens → language → Other`), keeping `README.md` and Web UI 100% consistent.",
         "- **Zero Rate-Limit Snapshot**: GitHub Actions publishes `data/dashboard.json` alongside `README.md` so visitors load the dashboard without hitting GitHub's 60 req/hr unauthenticated limit.",
-        "- **Privacy-Safe Private Repos**: When `PERSONAL_ACCESS_TOKEN` is configured, private repos are fetched via `/user/repos?affiliation=owner` and stripped down to **name and purpose (`tác dụng`) only** — no links, languages, stars, or timestamps.",
+        "- **Privacy-Safe Private Repos**: When `PERSONAL_ACCESS_TOKEN` is configured, private repos are fetched via `/user/repos?affiliation=owner` and stripped down to **name and purpose only** — no links, languages, stars, or timestamps.",
         "- **Hardened Web UI & Scoped Pages Deploy**: `index.html` renders strictly with safe DOM APIs (zero `innerHTML` / inline handlers) and `pages.yml` deploys only `_site/` (`index.html` + `data/dashboard.json`).",
-        "- **Adaptive Profile README**: Automatically syncs `{owner}/{owner}/README.md` with light/dark `<picture>` cards, dynamic language & tech-stack badges, project highlights, and contribution snake.",
+        "- **Adaptive Profile README**: Automatically syncs `{owner}/{owner}/README.md` (auto-detecting `main`/`master` default branch) with light/dark `<picture>` cards, dynamic language & tech-stack badges, project highlights, and auto-detected contribution snake.",
         "",
         "## 📈 Domain Breakdown (Public Repos)",
         "",
@@ -791,8 +841,8 @@ def generate_readme(repos, profile=None):
     if private_repos:
         lines.append(f"## 🔒 Private Repos ({len(private_repos)})")
         lines.append("")
-        lines.append("| Repo | Tác dụng |")
-        lines.append("|------|----------|")
+        lines.append("| Repo | Purpose |")
+        lines.append("|------|---------|")
         for r in private_repos:
             name = r["name"].replace("|", "/")
             desc = r["description"][:200].replace("|", "/")
@@ -821,55 +871,48 @@ def generate_readme(repos, profile=None):
     lines.extend([
         "---",
         "",
+        "<a id=\"setup-guide\"></a>",
         "<details>",
         "<summary><strong>🚀 Detailed Setup Guide (for forked users)</strong></summary>",
         "",
-        "> **Note for forked users**: After forking, run the workflow on your fork so all links, snapshot data, and profile content update to your username.",
+        "> **Fork-safe links**: Every Actions, Secrets, and Pages button below uses repo-relative links, so they point directly to **your fork** even before the first workflow run.",
         "",
-        "### 1. Enable the workflow (required on forks)",
+        "### 1. Enable GitHub Actions on your fork",
         "",
-        f"[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)]({actions_url})",
+        f"[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)]({actions_rel})",
         "",
-        "1. Click **Update Repos Dashboard** in the left sidebar",
-        "2. Click **Enable workflow** (if it shows as Disabled)",
+        "1. Click **I understand my workflows, go ahead and enable them** (required on forks)",
+        "2. Confirm **Update Repos Dashboard** is enabled in the left sidebar",
         "",
-        "### 2. Create your profile repository",
+        "### 2. Enable GitHub Pages (before first run)",
         "",
-        f"[![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)]({profile_repo_url})",
-        "",
-        f"- Name must be exactly: **`{OWNER}`**",
-        "- Visibility: **Public**",
-        "",
-        "### 3. Create a Personal Access Token",
-        "",
-        f"[![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)]({token_url})",
-        "",
-        "- Select **Generate new token (classic)**",
-        "- Check the **`repo`** scope (enables syncing your profile README and pulling private repos as name + purpose only)",
-        "- Copy the token immediately",
-        "",
-        "### 4. Add the token as a secret",
-        "",
-        f"[![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)]({secrets_url})",
-        "",
-        "- Name: `PERSONAL_ACCESS_TOKEN`",
-        "- Paste your token as the value",
-        "",
-        "### 5. Enable GitHub Pages",
-        "",
-        f"[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)]({pages_settings_url})",
+        f"[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)]({pages_settings_rel})",
         "",
         "1. Under **Build and deployment**, select Source: **GitHub Actions**",
         "2. The `Deploy to GitHub Pages` workflow packages only `index.html` and `data/dashboard.json` into `_site/` (never exposing `scripts/` or `README.md`)",
         "",
-        f"Dashboard will be available at: [{pages_url}]({pages_url})",
+        "### 3. (Optional) Enable Private Repos & Profile README Sync",
         "",
-        "### 6. (Optional) Add Contribution Snake",
+        "Skip this step if you only want a public repos dashboard. To include private repos (name + purpose only) and auto-update your GitHub profile:",
         "",
-        "To show the animated contribution snake on your profile (both light and dark themes):",
+        "1. **Create your profile repo** (if you don't have one yet): [![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new)",
+        "   - Repository name must match **your exact GitHub username** · Visibility: **Public**",
+        f"2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)]({token_url})",
+        "   - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token",
+        f"3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)]({secrets_rel})",
+        "   - Name: `PERSONAL_ACCESS_TOKEN` · Value: paste your token",
         "",
-        f"1. Go to your profile repo: [https://github.com/{OWNER}/{OWNER}](https://github.com/{OWNER}/{OWNER})",
-        "2. Create file `.github/workflows/snake.yml` with this content:",
+        "### 4. Run the dashboard workflow",
+        "",
+        f"[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)]({workflow_rel})",
+        "",
+        "Click **Run workflow** → updates `README.md`, `data/dashboard.json`, and your profile README (auto-detecting `main`/`master`), then automatically deploys GitHub Pages.",
+        "",
+        "### 5. (Optional) Add Contribution Snake",
+        "",
+        "The snake section is **automatically hidden** on your profile until the `output` branch exists (no broken image if skipped). To enable it:",
+        "",
+        "1. In your profile repo (`<your-username>/<your-username>`), create `.github/workflows/snake.yml`:",
         "",
         "```yaml",
         "name: Generate Snake",
@@ -883,7 +926,7 @@ def generate_readme(repos, profile=None):
         "    steps:",
         "      - uses: Platane/snk@v3",
         "        with:",
-        f"          github_user_name: {OWNER}",
+        "          github_user_name: ${{ github.repository_owner }}",
         "          outputs: |",
         "            dist/github-contribution-grid-snake.svg",
         "            dist/github-contribution-grid-snake-dark.svg?palette=github-dark",
@@ -895,17 +938,7 @@ def generate_readme(repos, profile=None):
         "          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}",
         "```",
         "",
-        f"3. Go to [Actions]({profile_actions_url}) → run **Generate Snake**",
-        "",
-        "### 7. Run the dashboard workflow",
-        "",
-        f"[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)]({workflow_url})",
-        "",
-        "This updates `README.md`, `data/dashboard.json`, and your profile README, then triggers GitHub Pages deployment.",
-        "",
-        "### 8. View your profile",
-        "",
-        f"[![View Profile](https://img.shields.io/badge/View_Profile-blue?style=for-the-badge)]({profile_view_url})",
+        f"2. Open your profile repo Actions (e.g. [Actions]({profile_actions_url})) → run **Generate Snake**, then re-run **Update Repos Dashboard**.",
         "",
         "</details>",
         "",

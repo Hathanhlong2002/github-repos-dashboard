@@ -2,19 +2,20 @@
 
 Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data/dashboard.json`), minimal private-repo listing (name + purpose only), and adaptive light/dark Profile README sync.
 
-[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://HTL2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/HTL2910/github-repos-dashboard/actions/workflows/update-dashboard.yml)
+[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://HTL2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](../../actions/workflows/update-dashboard.yml)
 
 **Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)  
-**Updated**: `2026-11-27 09:28 UTC`  
-**Total**: **78 repos** (`43` public · `35` private)
+**Updated**: `2026-11-27 09:41 UTC`  
+**Total**: **78 repos** (`43` public · `35` private)  
+<sub>Forking this repo? Jump to the <a href="#setup-guide">Setup Guide</a> below — all links automatically target your fork.</sub>
 
 ## ✨ Features
 
 - **Unified Categorization**: `scripts/update_dashboard.py` and `index.html` share identical priority rules (`topics → keyword tokens → language → Other`), keeping `README.md` and Web UI 100% consistent.
 - **Zero Rate-Limit Snapshot**: GitHub Actions publishes `data/dashboard.json` alongside `README.md` so visitors load the dashboard without hitting GitHub's 60 req/hr unauthenticated limit.
-- **Privacy-Safe Private Repos**: When `PERSONAL_ACCESS_TOKEN` is configured, private repos are fetched via `/user/repos?affiliation=owner` and stripped down to **name and purpose (`tác dụng`) only** — no links, languages, stars, or timestamps.
+- **Privacy-Safe Private Repos**: When `PERSONAL_ACCESS_TOKEN` is configured, private repos are fetched via `/user/repos?affiliation=owner` and stripped down to **name and purpose only** — no links, languages, stars, or timestamps.
 - **Hardened Web UI & Scoped Pages Deploy**: `index.html` renders strictly with safe DOM APIs (zero `innerHTML` / inline handlers) and `pages.yml` deploys only `_site/` (`index.html` + `data/dashboard.json`).
-- **Adaptive Profile README**: Automatically syncs `{owner}/{owner}/README.md` with light/dark `<picture>` cards, dynamic language & tech-stack badges, project highlights, and contribution snake.
+- **Adaptive Profile README**: Automatically syncs `{owner}/{owner}/README.md` (auto-detecting `main`/`master` default branch) with light/dark `<picture>` cards, dynamic language & tech-stack badges, project highlights, and auto-detected contribution snake.
 
 ## 📈 Domain Breakdown (Public Repos)
 
@@ -27,8 +28,8 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 
 ## 🔒 Private Repos (35)
 
-| Repo | Tác dụng |
-|------|----------|
+| Repo | Purpose |
+|------|---------|
 | **Adventure_3D** | Unity adventure 3D |
 | **AI-Gen-Image-Local** | - |
 | **ai-voice-assistant** | AI Voice Assistant for customer service |
@@ -130,55 +131,48 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 
 ---
 
+<a id="setup-guide"></a>
 <details>
 <summary><strong>🚀 Detailed Setup Guide (for forked users)</strong></summary>
 
-> **Note for forked users**: After forking, run the workflow on your fork so all links, snapshot data, and profile content update to your username.
+> **Fork-safe links**: Every Actions, Secrets, and Pages button below uses repo-relative links, so they point directly to **your fork** even before the first workflow run.
 
-### 1. Enable the workflow (required on forks)
+### 1. Enable GitHub Actions on your fork
 
-[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/actions)
+[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)](../../actions)
 
-1. Click **Update Repos Dashboard** in the left sidebar
-2. Click **Enable workflow** (if it shows as Disabled)
+1. Click **I understand my workflows, go ahead and enable them** (required on forks)
+2. Confirm **Update Repos Dashboard** is enabled in the left sidebar
 
-### 2. Create your profile repository
+### 2. Enable GitHub Pages (before first run)
 
-[![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new?name=HTL2910&description=Profile+README)
-
-- Name must be exactly: **`HTL2910`**
-- Visibility: **Public**
-
-### 3. Create a Personal Access Token
-
-[![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)](https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard)
-
-- Select **Generate new token (classic)**
-- Check the **`repo`** scope (enables syncing your profile README and pulling private repos as name + purpose only)
-- Copy the token immediately
-
-### 4. Add the token as a secret
-
-[![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/settings/secrets/actions)
-
-- Name: `PERSONAL_ACCESS_TOKEN`
-- Paste your token as the value
-
-### 5. Enable GitHub Pages
-
-[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/settings/pages)
+[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)](../../settings/pages)
 
 1. Under **Build and deployment**, select Source: **GitHub Actions**
 2. The `Deploy to GitHub Pages` workflow packages only `index.html` and `data/dashboard.json` into `_site/` (never exposing `scripts/` or `README.md`)
 
-Dashboard will be available at: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)
+### 3. (Optional) Enable Private Repos & Profile README Sync
 
-### 6. (Optional) Add Contribution Snake
+Skip this step if you only want a public repos dashboard. To include private repos (name + purpose only) and auto-update your GitHub profile:
 
-To show the animated contribution snake on your profile (both light and dark themes):
+1. **Create your profile repo** (if you don't have one yet): [![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new)
+   - Repository name must match **your exact GitHub username** · Visibility: **Public**
+2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)](https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard)
+   - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token
+3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)](../../settings/secrets/actions)
+   - Name: `PERSONAL_ACCESS_TOKEN` · Value: paste your token
 
-1. Go to your profile repo: [https://github.com/HTL2910/HTL2910](https://github.com/HTL2910/HTL2910)
-2. Create file `.github/workflows/snake.yml` with this content:
+### 4. Run the dashboard workflow
+
+[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)](../../actions/workflows/update-dashboard.yml)
+
+Click **Run workflow** → updates `README.md`, `data/dashboard.json`, and your profile README (auto-detecting `main`/`master`), then automatically deploys GitHub Pages.
+
+### 5. (Optional) Add Contribution Snake
+
+The snake section is **automatically hidden** on your profile until the `output` branch exists (no broken image if skipped). To enable it:
+
+1. In your profile repo (`<your-username>/<your-username>`), create `.github/workflows/snake.yml`:
 
 ```yaml
 name: Generate Snake
@@ -192,7 +186,7 @@ jobs:
     steps:
       - uses: Platane/snk@v3
         with:
-          github_user_name: HTL2910
+          github_user_name: ${{ github.repository_owner }}
           outputs: |
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake-dark.svg?palette=github-dark
@@ -204,17 +198,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-3. Go to [Actions](https://github.com/HTL2910/HTL2910/actions) → run **Generate Snake**
-
-### 7. Run the dashboard workflow
-
-[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/actions/workflows/update-dashboard.yml)
-
-This updates `README.md`, `data/dashboard.json`, and your profile README, then triggers GitHub Pages deployment.
-
-### 8. View your profile
-
-[![View Profile](https://img.shields.io/badge/View_Profile-blue?style=for-the-badge)](https://github.com/HTL2910/HTL2910)
+2. Open your profile repo Actions (e.g. [Actions](https://github.com/HTL2910/HTL2910/actions)) → run **Generate Snake**, then re-run **Update Repos Dashboard**.
 
 </details>
 

@@ -517,13 +517,13 @@
     }
 
     async function loadDashboardSnapshot(expectedUsername) {
-      const candidates = [];
+      // Prefer same-origin ./data/dashboard.json (works on main/master, private forks, and custom domains)
+      const candidates = ["./data/dashboard.json"];
       const hostOwner = detectUsername();
       if (hostOwner) {
         const repoName = detectRepoName();
         candidates.push(`https://raw.githubusercontent.com/${encodeURIComponent(hostOwner)}/${encodeURIComponent(repoName)}/main/data/dashboard.json`);
       }
-      candidates.push("./data/dashboard.json");
 
       for (const url of candidates) {
         try {
