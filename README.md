@@ -90,15 +90,18 @@ This updates this README and your profile README.
 
 **Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)
 
-**Updated**: 2026-11-26 02:19 UTC  
-**Total**: 39 repos (0 private / 39 public)
+**Updated**: 2026-11-27 02:34 UTC  
+**Total**: 43 repos (0 private / 43 public)
 
 ---
 
-## 🌐 Web / Frontend (6)
+## 🌐 Web / Frontend (9)
 
 | Repo | Language | Updated | Stars | Visibility | Description |
 |------|----------|---------|-------|------------|-------------|
+| [social-flow-extension](https://github.com/HTL2910/social-flow-extension) | JavaScript | 2026-11-26 | 0 | 🌐 | Social Flow - Chrome/Edge extension for automated page scrol |
+| [shopee-category-crawler](https://github.com/HTL2910/shopee-category-crawler) | JavaScript | 2026-11-26 | 0 | 🌐 | Chrome extension to crawl multiple Shopee categories with pa |
+| [page-harvest](https://github.com/HTL2910/page-harvest) | JavaScript | 2026-11-26 | 0 | 🌐 | Page Harvest - Chrome/Edge extension to select repeating web |
 | [FPS-Zombie-Suong-Mu](https://github.com/HTL2910/FPS-Zombie-Suong-Mu) | JavaScript | 2026-11-22 | 0 | 🌐 | FPS Zombie Sương Mù v6.5 — 3D WebGL/Three.js Survival Horror |
 | [Dungeon-Survivor-3D](https://github.com/HTL2910/Dungeon-Survivor-3D) | JavaScript | 2026-11-22 | 0 | 🌐 | Dungeon Survivor 3D — WebGL/Three.js Action Survivor with 26 |
 | [github-repos-dashboard](https://github.com/HTL2910/github-repos-dashboard) | HTML | 2026-11-10 | 1 | 🌐 | Automated overview & manager for all personal GitHub reposit |
@@ -137,10 +140,11 @@ This updates this README and your profile README.
 | [HTL2910](https://github.com/HTL2910/HTL2910) | - | 2026-11-10 | 0 | 🌐 | Config files for my GitHub profile. |
 | [Power-BI](https://github.com/HTL2910/Power-BI) | - | 2024-08-21 | 0 | 🌐 | Hoc Power BI |
 
-## 🤖 AI / ML (12)
+## 🤖 AI / ML (13)
 
 | Repo | Language | Updated | Stars | Visibility | Description |
 |------|----------|---------|-------|------------|-------------|
+| [OCR-Text-In-Vcam](https://github.com/HTL2910/OCR-Text-In-Vcam) | Python | 2026-11-26 | 0 | 🌐 | Real-time Windows screen OCR (Vietnamese + English ONNX) wit |
 | [muse-3-vn-realtime-voice-agent](https://github.com/HTL2910/muse-3-vn-realtime-voice-agent) | Python | 2026-11-22 | 0 | 🌐 | MuseAssistantTeam #3: vn-realtime-voice-agent — AI trợ lý gi |
 | [muse-1-vn-address-autofill](https://github.com/HTL2910/muse-1-vn-address-autofill) | Python | 2026-11-22 | 0 | 🌐 | Muse Company · nhiệm vụ #1: tôi có một bài toán như này : mộ |
 | [muse-2-multi-account-video-stats](https://github.com/HTL2910/muse-2-multi-account-video-stats) | Python | 2026-11-22 | 0 | 🌐 | MuseAssistantTeam · #2: multi-account-video-stats — hệ thống |
