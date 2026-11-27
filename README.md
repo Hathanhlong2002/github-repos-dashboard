@@ -5,8 +5,8 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 [![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://HTL2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/HTL2910/github-repos-dashboard/actions/workflows/update-dashboard.yml)
 
 **Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)  
-**Updated**: `2026-11-27 09:23 UTC`  
-**Total**: **43 repos** (`43` public · `0` private)
+**Updated**: `2026-11-27 09:24 UTC`  
+**Total**: **78 repos** (`43` public · `35` private)
 
 ## ✨ Features
 
@@ -24,6 +24,46 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 | 🤖 AI / ML | **14** | `████░░░░░░░░` 33% |
 | 🌐 Web / Frontend | **6** | `██░░░░░░░░░░` 14% |
 | 📁 Other | **2** | `█░░░░░░░░░░░` 5% |
+
+## 🔒 Private Repos (35)
+
+| Repo | Tác dụng |
+|------|----------|
+| **Adventure_3D** | Unity adventure 3D |
+| **AI-Gen-Image-Local** | - |
+| **ai-voice-assistant** | AI Voice Assistant for customer service |
+| **ALl_mockup_app** | mockup for app demo |
+| **android-hidden-api-bypass** | - |
+| **AR_VR_for_Unity** | AR for Unity |
+| **bus_travel** | Travel |
+| **create_model** | create model fbx |
+| **dola-render-gateway** | - |
+| **Download_Image_sharepoint** | - |
+| **Fit-Snap** | - |
+| **FloorplanToQOC** | FloorplanToQOC predict |
+| **Game-with-AI** | - |
+| **Gift** | myGift |
+| **hoplongtech_tool_web** | hoplongtech craw |
+| **kahi-ai-pro** | - |
+| **kiem-cu-duong-xua** | Kiếm Cũ Đường Xưa — game nhập vai kiếm hiệp 2.5D chơi trên trình duyệt (Vite + TypeScript + PixiJS) |
+| **Machine-Learning-Model** | Use Machine Learning |
+| **Many-feature** | có các chức năng sau này có thể cần dùng |
+| **Misumi_data_Tool** | tool |
+| **muse-6-bxv-address-autofill** | MuseAssistantTeam #6: bxv-address-autofill — Package TypeScript decideAddress cho opilot-pm (BXV Smart Call) |
+| **MUSE-TOOL-VIDEO** | Independent Windows tool for Muse account management and image/video automation |
+| **MuseAssistantTeam** | Công ty AI nhiều tài khoản Muse: chia việc theo sơ đồ công ty, hỏi đáp, duyệt bài, CEO báo cáo |
+| **my-gift** | unity |
+| **My_Asset_Unity** | save and test my new asset |
+| **my_Game** | gift for me |
+| **Onepiece-Asset** | - |
+| **React-Native-Example** | Learn Code React |
+| **React_web_gift** | private repo gift for friend |
+| **Security_Game** | Security in Game |
+| **shoot-to-win** | - |
+| **SmartPhone-website** | - |
+| **Unity_HDRP_Test** | unity project test feature in HDRP |
+| **zalo-bot** | - |
+| **Zalo-MiniApp** | Zalo Mini App - vote feature and future mini apps |
 
 ## 🎮 Unity / Game (21)
 

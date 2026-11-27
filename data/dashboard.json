@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "owner": "HTL2910",
-  "updated_at": "2026-11-27T09:23:00Z",
+  "updated_at": "2026-11-27T09:24:58Z",
   "profile": {
     "login": "HTL2910",
     "name": "Hà Thành Long",
@@ -599,5 +599,146 @@
       "category": "Unity / Game"
     }
   ],
-  "private_repos": []
+  "private_repos": [
+    {
+      "name": "Adventure_3D",
+      "description": "Unity adventure 3D"
+    },
+    {
+      "name": "AI-Gen-Image-Local",
+      "description": "-"
+    },
+    {
+      "name": "ai-voice-assistant",
+      "description": "AI Voice Assistant for customer service"
+    },
+    {
+      "name": "ALl_mockup_app",
+      "description": "mockup for app demo"
+    },
+    {
+      "name": "android-hidden-api-bypass",
+      "description": "-"
+    },
+    {
+      "name": "AR_VR_for_Unity",
+      "description": "AR for Unity"
+    },
+    {
+      "name": "bus_travel",
+      "description": "Travel"
+    },
+    {
+      "name": "create_model",
+      "description": "create model fbx"
+    },
+    {
+      "name": "dola-render-gateway",
+      "description": "-"
+    },
+    {
+      "name": "Download_Image_sharepoint",
+      "description": "-"
+    },
+    {
+      "name": "Fit-Snap",
+      "description": "-"
+    },
+    {
+      "name": "FloorplanToQOC",
+      "description": "FloorplanToQOC predict"
+    },
+    {
+      "name": "Game-with-AI",
+      "description": "-"
+    },
+    {
+      "name": "Gift",
+      "description": "myGift"
+    },
+    {
+      "name": "hoplongtech_tool_web",
+      "description": "hoplongtech craw"
+    },
+    {
+      "name": "kahi-ai-pro",
+      "description": "-"
+    },
+    {
+      "name": "kiem-cu-duong-xua",
+      "description": "Kiếm Cũ Đường Xưa — game nhập vai kiếm hiệp 2.5D chơi trên trình duyệt (Vite + TypeScript + PixiJS)"
+    },
+    {
+      "name": "Machine-Learning-Model",
+      "description": "Use Machine Learning"
+    },
+    {
+      "name": "Many-feature",
+      "description": "có các chức năng sau này có thể cần dùng"
+    },
+    {
+      "name": "Misumi_data_Tool",
+      "description": "tool"
+    },
+    {
+      "name": "muse-6-bxv-address-autofill",
+      "description": "MuseAssistantTeam #6: bxv-address-autofill — Package TypeScript decideAddress cho opilot-pm (BXV Smart Call)"
+    },
+    {
+      "name": "MUSE-TOOL-VIDEO",
+      "description": "Independent Windows tool for Muse account management and image/video automation"
+    },
+    {
+      "name": "MuseAssistantTeam",
+      "description": "Công ty AI nhiều tài khoản Muse: chia việc theo sơ đồ công ty, hỏi đáp, duyệt bài, CEO báo cáo"
+    },
+    {
+      "name": "my-gift",
+      "description": "unity"
+    },
+    {
+      "name": "My_Asset_Unity",
+      "description": "save and test my new asset"
+    },
+    {
+      "name": "my_Game",
+      "description": "gift for me"
+    },
+    {
+      "name": "Onepiece-Asset",
+      "description": "-"
+    },
+    {
+      "name": "React-Native-Example",
+      "description": "Learn Code React"
+    },
+    {
+      "name": "React_web_gift",
+      "description": "private repo gift for friend"
+    },
+    {
+      "name": "Security_Game",
+      "description": "Security in Game"
+    },
+    {
+      "name": "shoot-to-win",
+      "description": "-"
+    },
+    {
+      "name": "SmartPhone-website",
+      "description": "-"
+    },
+    {
+      "name": "Unity_HDRP_Test",
+      "description": "unity project test feature in HDRP"
+    },
+    {
+      "name": "zalo-bot",
+      "description": "-"
+    },
+    {
+      "name": "Zalo-MiniApp",
+      "description": "Zalo Mini App - vote feature and future mini apps"
+    }
+  ]
 }
