@@ -2,17 +2,17 @@
 
 Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data/dashboard.json`), minimal private-repo listing (name + purpose only), and adaptive light/dark Profile README sync.
 
-[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://htl2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](#setup-guide)
+[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://htl2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/HTL2910/github-repos-dashboard/generate)
 
 **Web Dashboard**: [https://htl2910.github.io/github-repos-dashboard/](https://htl2910.github.io/github-repos-dashboard/)  
-**Updated**: `2026-11-27 10:10 UTC`  
+**Updated**: `2026-11-27 10:13 UTC`  
 **Total**: **78 repos** (`43` public · `35` private)
 
 > **Using this for your own GitHub Profile?**
-> 1. Fork this repo (or click **Use this template**)
-> 2. On **your fork's top bar**, open **Actions** → enable workflows
-> 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your fork's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`
-> 4. On **your fork's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)
+> 1. [Use this template](https://github.com/HTL2910/github-repos-dashboard/generate) (or [Fork this repo](https://github.com/HTL2910/github-repos-dashboard/fork))
+> 2. On **your copy's top bar**, open **Actions** → enable workflows *(already enabled if created from template)*
+> 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your repo's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`
+> 4. On **your repo's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)
 
 ## ✨ Features
 

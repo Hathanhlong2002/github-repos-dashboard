@@ -203,6 +203,7 @@ def sanitize_public_repo(repo: dict) -> dict:
         "forks_count": repo.get("forks_count", 0),
         "open_issues_count": repo.get("open_issues_count", 0),
         "private": False,
+        "is_template": bool(repo.get("is_template")),
         "category": categorize_key(repo),
     }
 
@@ -913,6 +914,22 @@ def generate_readme(repos, profile=None):
     pages_url = f"https://{OWNER.lower()}.github.io/{REPO_NAME}/"
     profile_view_url = f"https://github.com/{OWNER}/{OWNER}"
 
+    current_repo = next(
+        (r for r in repos if (r.get("name") or "").lower() == REPO_NAME.lower()),
+        None,
+    )
+    is_template = bool(current_repo and current_repo.get("is_template"))
+    use_repo_url = (
+        f"https://github.com/{OWNER}/{REPO_NAME}/generate"
+        if is_template
+        else f"https://github.com/{OWNER}/{REPO_NAME}/fork"
+    )
+    use_repo_cta = (
+        f"[Use this template]({use_repo_url}) (or [Fork this repo](https://github.com/{OWNER}/{REPO_NAME}/fork))"
+        if is_template
+        else f"[Fork this repo]({use_repo_url})"
+    )
+
     cat_counts = Counter(categorize_key(r) for r in public_repos)
 
     lines = [
@@ -922,17 +939,17 @@ def generate_readme(repos, profile=None):
         "",
         f"[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)]({pages_url}) "
         f"[![View Profile](https://img.shields.io/badge/Profile_{_shields_escape(OWNER)}-1E293B?style=for-the-badge&logo=github&logoColor=white)]({profile_view_url}) "
-        "[![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](#setup-guide)",
+        f"[![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({use_repo_url})",
         "",
         f"**Web Dashboard**: [{pages_url}]({pages_url})  ",
         f"**Updated**: `{now}`  ",
         f"**Total**: **{total} repos** (`{public}` public · `{private}` private)",
         "",
         "> **Using this for your own GitHub Profile?**",
-        "> 1. Fork this repo (or click **Use this template**)",
-        "> 2. On **your fork's top bar**, open **Actions** → enable workflows",
-        "> 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your fork's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`",
-        "> 4. On **your fork's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)",
+        f"> 1. {use_repo_cta}",
+        "> 2. On **your copy's top bar**, open **Actions** → enable workflows *(already enabled if created from template)*",
+        "> 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your repo's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`",
+        "> 4. On **your repo's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)",
         "",
         "## ✨ Features",
         "",
