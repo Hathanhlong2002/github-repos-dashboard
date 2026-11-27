@@ -4,10 +4,15 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 
 [![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://htl2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](#setup-guide)
 
-**Web Dashboard**: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)  
-**Updated**: `2026-11-27 09:54 UTC`  
-**Total**: **78 repos** (`43` public · `35` private)  
-<sub>Forking this repo? Jump to the <a href="#setup-guide">Setup Guide</a> below — use the <strong>Actions</strong> &amp; <strong>Settings</strong> tabs at the top of your fork for the first run, then all links auto-update to your repo.</sub>
+**Web Dashboard**: [https://htl2910.github.io/github-repos-dashboard/](https://htl2910.github.io/github-repos-dashboard/)  
+**Updated**: `2026-11-27 10:07 UTC`  
+**Total**: **78 repos** (`43` public · `35` private)
+
+> **Using this for your own GitHub Profile?**
+> 1. Fork this repo (or click **Use this template**)
+> 2. On **your fork's top bar**, open **Actions** → enable workflows
+> 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your fork's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`
+> 4. On **your fork's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)
 
 ## ✨ Features
 
@@ -115,10 +120,10 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 
 | Repo | Language | Updated | Stars | Description |
 |------|----------|---------|------:|-------------|
+| [**github-repos-dashboard**](https://github.com/HTL2910/github-repos-dashboard) | `HTML` | `2026-11-27` | 1 | Automated overview & manager for all personal GitHub repositories. Helps the owner and… |
 | [**social-flow-extension**](https://github.com/HTL2910/social-flow-extension) | `JavaScript` | `2026-11-26` | 0 | Social Flow - Chrome/Edge extension for automated page scrolling and configurable… |
 | [**shopee-category-crawler**](https://github.com/HTL2910/shopee-category-crawler) | `JavaScript` | `2026-11-26` | 0 | Chrome extension to crawl multiple Shopee categories with pagination, saved progress… |
 | [**page-harvest**](https://github.com/HTL2910/page-harvest) | `JavaScript` | `2026-11-26` | 0 | Page Harvest - Chrome/Edge extension to select repeating web items or tables and… |
-| [**github-repos-dashboard**](https://github.com/HTL2910/github-repos-dashboard) | `HTML` | `2026-11-10` | 1 | Automated overview & manager for all personal GitHub repositories. Helps the owner and… |
 | [**bang-cards-deck**](https://github.com/HTL2910/bang-cards-deck) | `TypeScript` | `2026-11-01` | 0 | - |
 | [**JavaScript-Project**](https://github.com/HTL2910/JavaScript-Project) | `HTML` | `2025-02-17` | 0 | Learn JavaScript |
 

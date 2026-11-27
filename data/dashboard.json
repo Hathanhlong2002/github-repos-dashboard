@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "owner": "HTL2910",
-  "updated_at": "2026-11-27T09:54:54Z",
+  "updated_at": "2026-11-27T10:07:45Z",
   "profile": {
     "login": "HTL2910",
     "name": "Hà Thành Long",
@@ -18,6 +18,19 @@
     "html_url": "https://github.com/HTL2910"
   },
   "public_repos": [
+    {
+      "name": "github-repos-dashboard",
+      "html_url": "https://github.com/HTL2910/github-repos-dashboard",
+      "description": "Automated overview & manager for all personal GitHub repositories. Helps the owner and visitors quickly understand projects, statuses, and purposes after long absences.",
+      "language": "HTML",
+      "topics": [],
+      "updated_at": "2026-11-27T10:06:20Z",
+      "stargazers_count": 1,
+      "forks_count": 1,
+      "open_issues_count": 0,
+      "private": false,
+      "category": "Web / Frontend"
+    },
     {
       "name": "social-flow-extension",
       "html_url": "https://github.com/HTL2910/social-flow-extension",
@@ -163,19 +176,6 @@
       "open_issues_count": 0,
       "private": false,
       "category": "Other"
-    },
-    {
-      "name": "github-repos-dashboard",
-      "html_url": "https://github.com/HTL2910/github-repos-dashboard",
-      "description": "Automated overview & manager for all personal GitHub repositories. Helps the owner and visitors quickly understand projects, statuses, and purposes after long absences.",
-      "language": "HTML",
-      "topics": [],
-      "updated_at": "2026-11-10T04:43:36Z",
-      "stargazers_count": 1,
-      "forks_count": 1,
-      "open_issues_count": 0,
-      "private": false,
-      "category": "Web / Frontend"
     },
     {
       "name": "AWS-AI-chatbot",
