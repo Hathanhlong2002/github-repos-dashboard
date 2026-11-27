@@ -1,15 +1,15 @@
-# 📊 GitHub Repos Dashboard — Hà Thành Long
+# 📊 GitHub Repos Dashboard — Long
 
 Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data/dashboard.json`), minimal private-repo listing (name + purpose only), and adaptive light/dark Profile README sync.
 
-[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://htl2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/new?template_owner=HTL2910&template_name=github-repos-dashboard&name=github-repos-dashboard&description=Automated%20GitHub%20repos%20dashboard%20and%20dynamic%20profile%20README&visibility=public)
+[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://hathanhlong2002.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_Hathanhlong2002-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Hathanhlong2002/Hathanhlong2002) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/Hathanhlong2002/github-repos-dashboard/fork)
 
-**Web Dashboard**: [https://htl2910.github.io/github-repos-dashboard/](https://htl2910.github.io/github-repos-dashboard/)  
-**Updated**: `2026-11-27 10:21 UTC`  
-**Total**: **78 repos** (`43` public · `35` private)
+**Web Dashboard**: [https://hathanhlong2002.github.io/github-repos-dashboard/](https://hathanhlong2002.github.io/github-repos-dashboard/)  
+**Updated**: `2026-11-27 10:25 UTC`  
+**Total**: **38 repos** (`27` public · `11` private)
 
 > **Using this for your own GitHub Profile?**
-> 1. [Use this template](https://github.com/new?template_owner=HTL2910&template_name=github-repos-dashboard&name=github-repos-dashboard&description=Automated%20GitHub%20repos%20dashboard%20and%20dynamic%20profile%20README&visibility=public) (or [Fork this repo](https://github.com/HTL2910/github-repos-dashboard/fork))
+> 1. [Fork this repo](https://github.com/Hathanhlong2002/github-repos-dashboard/fork)
 > 2. On **your copy's top bar**, open **Actions** → enable workflows *(already enabled if created from template)*
 > 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your repo's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`
 > 4. On **your repo's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)
@@ -26,113 +26,73 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 
 | Domain | Public Repos | Share |
 |--------|-------------:|-------|
-| 🎮 Unity / Game | **21** | `██████░░░░░░` 49% |
-| 🤖 AI / ML | **14** | `████░░░░░░░░` 33% |
-| 🌐 Web / Frontend | **6** | `██░░░░░░░░░░` 14% |
-| 📁 Other | **2** | `█░░░░░░░░░░░` 5% |
+| 🎮 Unity / Game | **11** | `█████░░░░░░░` 41% |
+| 📁 Other | **7** | `███░░░░░░░░░` 26% |
+| 🤖 AI / ML | **5** | `██░░░░░░░░░░` 19% |
+| 🌐 Web / Frontend | **4** | `██░░░░░░░░░░` 15% |
 
-## 🔒 Private Repos (35)
+## 🔒 Private Repos (11)
 
 | Repo | Purpose |
 |------|---------|
-| **Adventure_3D** | Unity adventure 3D |
-| **AI-Gen-Image-Local** | - |
-| **ai-voice-assistant** | AI Voice Assistant for customer service |
-| **ALl_mockup_app** | mockup for app demo |
-| **android-hidden-api-bypass** | - |
-| **AR_VR_for_Unity** | AR for Unity |
-| **bus_travel** | Travel |
-| **create_model** | create model fbx |
-| **dola-render-gateway** | - |
-| **Download_Image_sharepoint** | - |
-| **Fit-Snap** | - |
-| **FloorplanToQOC** | FloorplanToQOC predict |
-| **Game-with-AI** | - |
-| **Gift** | myGift |
-| **hoplongtech_tool_web** | hoplongtech craw |
-| **kahi-ai-pro** | - |
-| **kiem-cu-duong-xua** | Kiếm Cũ Đường Xưa — game nhập vai kiếm hiệp 2.5D chơi trên trình duyệt (Vite + TypeScript + PixiJS) |
-| **Machine-Learning-Model** | Use Machine Learning |
-| **Many-feature** | có các chức năng sau này có thể cần dùng |
-| **Misumi_data_Tool** | tool |
-| **muse-6-bxv-address-autofill** | MuseAssistantTeam #6: bxv-address-autofill — Package TypeScript decideAddress cho opilot-pm (BXV Smart Call) |
-| **MUSE-TOOL-VIDEO** | Independent Windows tool for Muse account management and image/video automation |
-| **MuseAssistantTeam** | Công ty AI nhiều tài khoản Muse: chia việc theo sơ đồ công ty, hỏi đáp, duyệt bài, CEO báo cáo |
-| **my-gift** | unity |
-| **My_Asset_Unity** | save and test my new asset |
-| **my_Game** | gift for me |
-| **Onepiece-Asset** | - |
-| **React-Native-Example** | Learn Code React |
-| **React_web_gift** | private repo gift for friend |
-| **Security_Game** | Security in Game |
-| **shoot-to-win** | - |
-| **SmartPhone-website** | - |
-| **Unity_HDRP_Test** | unity project test feature in HDRP |
-| **zalo-bot** | - |
-| **Zalo-MiniApp** | Zalo Mini App - vote feature and future mini apps |
+| **3D-Asset-Unity** | Save some asset 3d unity can used |
+| **Build-Home** | Build Home 3d |
+| **Cat-find-Home** | - |
+| **Craw-Data-industryGroup** | craw data product from industry group |
+| **HTL2910** | No |
+| **muse-5-nghien-cuu-thi-truong-va-tao-mot-app-doc** | Muse Company · nhiệm vụ #5: nghiên cứu thị trường và tạo một app đôc đáo giải quyết nỗi đau của người dùng để đưa lên google play store |
+| **MuseCompanAITeam** | Công ty AI nhiều tài khoản Muse: chia việc theo sơ đồ công ty, hỏi đáp, duyệt bài, CEO báo cáo |
+| **react-native-demo** | - |
+| **ReactNative** | - |
+| **SwiftUI** | - |
+| **test-lai-hocSai1** | Hoc Unity |
 
-## 🎮 Unity / Game (21)
+## 🎮 Unity / Game (11)
 
 | Repo | Language | Updated | Stars | Description |
 |------|----------|---------|------:|-------------|
-| [**FPS-Zombie-Suong-Mu**](https://github.com/HTL2910/FPS-Zombie-Suong-Mu) | `JavaScript` | `2026-11-22` | 0 | FPS Zombie Sương Mù v6.5 — 3D WebGL/Three.js Survival Horror FPS in Ha Don Village… |
-| [**Dungeon-Survivor-3D**](https://github.com/HTL2910/Dungeon-Survivor-3D) | `JavaScript` | `2026-11-22` | 0 | Dungeon Survivor 3D — WebGL/Three.js Action Survivor with 26 A-Z VFX skills, 6 heroes… |
-| [**Wocel**](https://github.com/HTL2910/Wocel) | `C#` | `2026-10-08` | 0 | - |
-| [**Echo-of-the-Void**](https://github.com/HTL2910/Echo-of-the-Void) | `C#` | `2026-09-26` | 0 | Echo of the Void là tựa game 2D Precision-Platformer kết hợp Metroidvania nhịp độ… |
-| [**education**](https://github.com/HTL2910/education) | `C#` | `2025-12-20` | 1 | unity 3d |
-| [**Environmental-Education**](https://github.com/HTL2910/Environmental-Education) | `C#` | `2025-12-20` | 1 | Environmental Education Unity Game |
-| [**Farm**](https://github.com/HTL2910/Farm) | `C#` | `2025-09-07` | 0 | Farming game made in Unity |
-| [**SaveDataUnity**](https://github.com/HTL2910/SaveDataUnity) | `ShaderLab` | `2025-08-23` | 0 | Use Asset Bundles and addressable |
-| [**Voice_Game**](https://github.com/HTL2910/Voice_Game) | `C#` | `2025-08-03` | 0 | use voice to play game |
-| [**photon_Game**](https://github.com/HTL2910/photon_Game) | `C#` | `2025-08-03` | 0 | Photon Game Unity |
-| [**Whisper-For-Unity**](https://github.com/HTL2910/Whisper-For-Unity) | `-` | `2025-07-22` | 0 | Use Whisper for Unity and select Model |
-| [**TestBuildingSystem**](https://github.com/HTL2910/TestBuildingSystem) | `C#` | `2025-07-09` | 0 | testBuilding System - use System Surival |
-| [**JellyField**](https://github.com/HTL2910/JellyField) | `ShaderLab` | `2025-05-25` | 0 | unity clone test Jelly-Field |
-| [**Infinity-Ball**](https://github.com/HTL2910/Infinity-Ball) | `ShaderLab` | `2025-05-17` | 0 | unity beginer |
-| [**URP_Game**](https://github.com/HTL2910/URP_Game) | `ShaderLab` | `2024-12-15` | 0 | Use for URP Project Test |
-| [**Game-Developer-3D**](https://github.com/HTL2910/Game-Developer-3D) | `-` | `2024-12-02` | 0 | Udemy Course |
-| [**Color-Maze-Adventure**](https://github.com/HTL2910/Color-Maze-Adventure) | `ShaderLab` | `2024-11-20` | 0 | Unity Game Color Maze Adventure |
-| [**Game-Do_Vui**](https://github.com/HTL2910/Game-Do_Vui) | `ShaderLab` | `2024-08-26` | 0 | unity game 2D |
-| [**UnityLearning**](https://github.com/HTL2910/UnityLearning) | `Mathematica` | `2024-08-04` | 0 | https://learn.unity.com/ed-pd/course/teach-unity |
-| [**Casual-Game**](https://github.com/HTL2910/Casual-Game) | `ShaderLab` | `2024-07-26` | 0 | unity |
-| [**BanMayBay2D**](https://github.com/HTL2910/BanMayBay2D) | `C#` | `2024-03-17` | 0 | 2D unity Basic |
+| [**ForgeTax-Mini-3D-Game**](https://github.com/Hathanhlong2002/ForgeTax-Mini-3D-Game) | `HTML` | `2026-11-11` | 0 | - |
+| [**BallPlatform3d-Casual-Game_Unity**](https://github.com/Hathanhlong2002/BallPlatform3d-Casual-Game_Unity) | `ShaderLab` | `2026-10-18` | 0 | unity 3d casual game |
+| [**UniTask**](https://github.com/Hathanhlong2002/UniTask) | `-` | `2026-09-12` | 0 | Provides an efficient allocation free async/await integration for Unity. |
+| [**unity-mcp**](https://github.com/Hathanhlong2002/unity-mcp) | `-` | `2026-09-12` | 0 | Unity MCP acts as a bridge between AI assistants and your Unity Editor. Give your LLM… |
+| [**unity-actions**](https://github.com/Hathanhlong2002/unity-actions) | `-` | `2026-09-12` | 0 | Github actions for testing and building Unity projects |
+| [**ml-agents**](https://github.com/Hathanhlong2002/ml-agents) | `-` | `2026-09-12` | 0 | The Unity Machine Learning Agents Toolkit (ML-Agents) is an open-source project that… |
+| [**TimDoi**](https://github.com/Hathanhlong2002/TimDoi) | `C#` | `2023-07-19` | 0 | unity 2d |
+| [**QHTT**](https://github.com/Hathanhlong2002/QHTT) | `ShaderLab` | `2023-07-19` | 0 | unity matrix |
+| [**Game-2d-ban-may-bay-c--b-n**](https://github.com/Hathanhlong2002/Game-2d-ban-may-bay-c--b-n) | `C#` | `2023-07-19` | 0 | unity game |
+| [**flappy-bird**](https://github.com/Hathanhlong2002/flappy-bird) | `C#` | `2023-07-19` | 0 | unity game flappy bird |
+| [**Doan-So-udemy**](https://github.com/Hathanhlong2002/Doan-So-udemy) | `C#` | `2023-07-19` | 0 | unity c# |
 
-## 🤖 AI / ML (14)
+## 📁 Other (7)
 
 | Repo | Language | Updated | Stars | Description |
 |------|----------|---------|------:|-------------|
-| [**OCR-Text-In-Vcam**](https://github.com/HTL2910/OCR-Text-In-Vcam) | `Python` | `2026-11-26` | 0 | Real-time Windows screen OCR (Vietnamese + English ONNX) with timestamped file logging |
-| [**muse-3-vn-realtime-voice-agent**](https://github.com/HTL2910/muse-3-vn-realtime-voice-agent) | `Python` | `2026-11-22` | 0 | MuseAssistantTeam #3: vn-realtime-voice-agent — AI trợ lý giọng nói realtime trả lời… |
-| [**muse-1-vn-address-autofill**](https://github.com/HTL2910/muse-1-vn-address-autofill) | `Python` | `2026-11-22` | 0 | Muse Company · nhiệm vụ #1: tôi có một bài toán như này : một cửa hàng bán đồ tiêu… |
-| [**muse-2-multi-account-video-stats**](https://github.com/HTL2910/muse-2-multi-account-video-stats) | `Python` | `2026-11-22` | 0 | MuseAssistantTeam · #2: multi-account-video-stats — hệ thống quản lý account facebook… |
-| [**laya_address_vn**](https://github.com/HTL2910/laya_address_vn) | `Python` | `2026-11-22` | 0 | Laya Address VN: Browser ONNX & CPU Backend Vietnamese Address Sufficiency Gates (v1… |
-| [**AWS-AI-chatbot**](https://github.com/HTL2910/AWS-AI-chatbot) | `TypeScript` | `2026-11-04` | 0 | SafeGraph AI - VS Code AI coding assistant with Amazon Bedrock integration, local… |
-| [**hypit**](https://github.com/HTL2910/hypit) | `-` | `2026-10-05` | 0 | Clone any viral video with AI agents. Not just a script, the whole workflow: swap the… |
-| [**Full-Stack-Data-Science---Machine-Learning-BootCamp-Course**](https://github.com/HTL2910/Full-Stack-Data-Science---Machine-Learning-BootCamp-Course) | `Jupyter Notebook` | `2026-09-25` | 0 | Learn Udemy Full Stack Data Science & Machine Learning BootCamp Course |
-| [**shorts**](https://github.com/HTL2910/shorts) | `Python` | `2026-09-10` | 0 | 🎥 AI Youtube Shorts video generator using Gemini API for images, voiceovers, music.… |
-| [**Interview-Project**](https://github.com/HTL2910/Interview-Project) | `Python` | `2026-07-30` | 0 | Interview Job test |
-| [**Chay-Code**](https://github.com/HTL2910/Chay-Code) | `Python` | `2025-08-29` | 0 | Chay code |
-| [**Web-Scraping_Web-Crawling**](https://github.com/HTL2910/Web-Scraping_Web-Crawling) | `Python` | `2025-02-14` | 1 | Use Python 3, Selenium, BeautifulSoup and Chromium |
-| [**OpenCV-with-Python**](https://github.com/HTL2910/OpenCV-with-Python) | `Python` | `2024-11-13` | 0 | OpenCV with Python:Recognition,Detection |
-| [**Graph-based-recommend-system-using-GNN**](https://github.com/HTL2910/Graph-based-recommend-system-using-GNN) | `Jupyter Notebook` | `2024-07-26` | 0 | Đồ án tốt nghiệp |
+| [**Hathanhlong2002**](https://github.com/Hathanhlong2002/Hathanhlong2002) | `-` | `2026-11-10` | 0 | Profile README |
+| [**wxt**](https://github.com/Hathanhlong2002/wxt) | `-` | `2026-09-12` | 0 | ⚡ Next-gen Web Extension Framework |
+| [**playwright-mcp**](https://github.com/Hathanhlong2002/playwright-mcp) | `-` | `2026-09-12` | 0 | Playwright MCP server |
+| [**uv**](https://github.com/Hathanhlong2002/uv) | `-` | `2026-09-12` | 0 | An extremely fast Python package and project manager, written in Rust. |
+| [**dagger**](https://github.com/Hathanhlong2002/dagger) | `-` | `2026-09-12` | 0 | Automation engine to build, test and ship any codebase. Runs locally, in CI, or… |
+| [**superpowers**](https://github.com/Hathanhlong2002/superpowers) | `-` | `2026-09-12` | 0 | An agentic skills framework & software development methodology that works. |
+| [**spec-kit**](https://github.com/Hathanhlong2002/spec-kit) | `-` | `2026-09-12` | 0 | 💫 Toolkit to help you get started with Spec-Driven Development |
 
-## 🌐 Web / Frontend (6)
+## 🤖 AI / ML (5)
 
 | Repo | Language | Updated | Stars | Description |
 |------|----------|---------|------:|-------------|
-| [**github-repos-dashboard**](https://github.com/HTL2910/github-repos-dashboard) | `HTML` | `2026-11-27` | 1 | Automated overview & manager for all personal GitHub repositories. Helps the owner and… |
-| [**social-flow-extension**](https://github.com/HTL2910/social-flow-extension) | `JavaScript` | `2026-11-26` | 0 | Social Flow - Chrome/Edge extension for automated page scrolling and configurable… |
-| [**shopee-category-crawler**](https://github.com/HTL2910/shopee-category-crawler) | `JavaScript` | `2026-11-26` | 0 | Chrome extension to crawl multiple Shopee categories with pagination, saved progress… |
-| [**page-harvest**](https://github.com/HTL2910/page-harvest) | `JavaScript` | `2026-11-26` | 0 | Page Harvest - Chrome/Edge extension to select repeating web items or tables and… |
-| [**bang-cards-deck**](https://github.com/HTL2910/bang-cards-deck) | `TypeScript` | `2026-11-01` | 0 | - |
-| [**JavaScript-Project**](https://github.com/HTL2910/JavaScript-Project) | `HTML` | `2025-02-17` | 0 | Learn JavaScript |
+| [**gflow-cli**](https://github.com/Hathanhlong2002/gflow-cli) | `TypeScript` | `2026-10-14` | 0 | GFlow CLI — Command-line tool that automates Google Flow in your local Chrome browser.… |
+| [**awesome-llm-apps**](https://github.com/Hathanhlong2002/awesome-llm-apps) | `-` | `2026-04-23` | 0 | 100+ AI Agent & RAG apps you can actually run — clone, customize, ship. |
+| [**learn_code_python-and-analysts-for-dataset**](https://github.com/Hathanhlong2002/learn_code_python-and-analysts-for-dataset) | `Jupyter Notebook` | `2023-08-01` | 0 | Code python |
+| [**Python-for-data-science**](https://github.com/Hathanhlong2002/Python-for-data-science) | `Jupyter Notebook` | `2023-06-22` | 0 | Phân tích điểm thi |
+| [**Thi-giac-may-tinh**](https://github.com/Hathanhlong2002/Thi-giac-may-tinh) | `Jupyter Notebook` | `2023-06-22` | 0 | thi giac may tinh |
 
-## 📁 Other (2)
+## 🌐 Web / Frontend (4)
 
 | Repo | Language | Updated | Stars | Description |
 |------|----------|---------|------:|-------------|
-| [**HTL2910**](https://github.com/HTL2910/HTL2910) | `-` | `2026-11-10` | 0 | Config files for my GitHub profile. |
-| [**Power-BI**](https://github.com/HTL2910/Power-BI) | `-` | `2024-08-21` | 0 | Hoc Power BI |
+| [**github-repos-dashboard-Fork**](https://github.com/Hathanhlong2002/github-repos-dashboard-Fork) | `Python` | `2026-11-27` | 0 | Automated GitHub repos dashboard and dynamic profile README |
+| [**github-repos-dashboard**](https://github.com/Hathanhlong2002/github-repos-dashboard) | `HTML` | `2026-11-10` | 0 | Automated overview & manager for all personal GitHub repositories. Helps the owner and… |
+| [**eyetube-control**](https://github.com/Hathanhlong2002/eyetube-control) | `JavaScript` | `2026-09-13` | 0 | - |
+| [**tool-capture**](https://github.com/Hathanhlong2002/tool-capture) | `TypeScript` | `2026-09-13` | 0 | - |
 
 ---
 
