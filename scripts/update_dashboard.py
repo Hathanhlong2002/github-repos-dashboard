@@ -10,7 +10,7 @@ import os
 import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import requests
 
@@ -120,9 +120,9 @@ LANGUAGE_MAP = {
     "svelte": "Web / Frontend",
 }
 
-# Dynamic badge metadata for profile README toolchain section
+# Dynamic badge metadata for profile README toolchain section (verified Simple Icons slugs)
 LANGUAGE_BADGE_META = {
-    "c#": ("239120", "csharp", "white"),
+    "c#": ("239120", "dotnet", "white"),
     "python": ("3776AB", "python", "white"),
     "typescript": ("3178C6", "typescript", "white"),
     "javascript": ("F7DF1E", "javascript", "black"),
@@ -147,6 +147,25 @@ LANGUAGE_BADGE_META = {
     "svelte": ("FF3E00", "svelte", "white"),
     "mathematica": ("DD1100", "wolframmathematica", "white"),
 }
+
+# Frameworks / engines / platforms inferred automatically from public repo metadata
+TECH_STACK_RULES = [
+    ("Unity", {"unity", "unity3d", "shaderlab", "urp", "photon"}, ("unity",), "111827", "unity", "white"),
+    ("Three.js", {"threejs"}, ("three js", "three.js"), "000000", "threedotjs", "white"),
+    ("WebGL", {"webgl"}, ("webgl",), "990000", "webgl", "white"),
+    ("AWS Bedrock", {"bedrock"}, ("amazon bedrock", "aws bedrock"), "FF9900", None, "black"),
+    ("Google Gemini", {"gemini"}, ("gemini api", "google gemini"), "8E75B2", "googlegemini", "white"),
+    ("LLM & Agents", {"openai", "llm", "gpt", "agent", "agents"}, ("openai", "voice agent"), "412991", None, "white"),
+    ("ONNX", {"onnx"}, ("onnx",), "005CED", "onnx", "white"),
+    ("OpenCV", {"opencv"}, ("opencv",), "5C3EE8", "opencv", "white"),
+    ("Selenium", {"selenium"}, ("selenium",), "43B02A", "selenium", "white"),
+    ("React", {"react"}, ("react",), "20232A", "react", "61DAFB"),
+    ("Next.js", {"nextjs"}, ("next js", "next.js"), "000000", "nextdotjs", "white"),
+    ("Docker", {"docker", "dockerfile"}, ("docker",), "2496ED", "docker", "white"),
+    ("PyTorch", {"pytorch"}, ("pytorch",), "EE4C2C", "pytorch", "white"),
+    ("FastAPI", {"fastapi"}, ("fastapi",), "009688", "fastapi", "white"),
+    ("Zalo Mini App", {"zalo", "miniapp"}, ("zalo", "mini app"), "0068FF", None, "white"),
+]
 
 
 def _clean_description(desc) -> str:
@@ -298,13 +317,41 @@ def categorize(repo: dict) -> str:
     return CATEGORY_LABELS[categorize_key(repo)]
 
 
+def _safe_http_url(url: str | None) -> str:
+    if not url:
+        return ""
+    candidate = url.strip()
+    if not candidate or " " in candidate:
+        return ""
+    if "://" not in candidate:
+        if ":" in candidate.split("/")[0]:
+            return ""
+        candidate = f"https://{candidate}"
+    parsed = urlparse(candidate)
+    if parsed.scheme in ("http", "https") and parsed.netloc:
+        return candidate
+    return ""
+
+
+def _shields_escape(text: str) -> str:
+    return quote(text.replace("-", "--").replace("_", "__"), safe="")
+
+
+def _build_badge(label: str, color: str, logo: str | None = None, logo_color: str = "white") -> str:
+    encoded = _shields_escape(label)
+    params = ["style=for-the-badge"]
+    if logo:
+        params.append(f"logo={logo}")
+        params.append(f"logoColor={logo_color}")
+    return f"![{label}](https://img.shields.io/badge/{encoded}-{color}?{'&'.join(params)})"
+
+
 def build_language_badge(lang: str) -> str:
-    shields_label = quote(lang.replace("-", "--").replace("_", "__"), safe="")
     meta = LANGUAGE_BADGE_META.get(lang.lower())
     if meta:
         color, logo, logo_color = meta
-        return f"![{lang}](https://img.shields.io/badge/{shields_label}-{color}?style=for-the-badge&logo={logo}&logoColor={logo_color})"
-    return f"![{lang}](https://img.shields.io/badge/{shields_label}-4B5563?style=for-the-badge)"
+        return _build_badge(lang, color, logo, logo_color)
+    return _build_badge(lang, "4B5563")
 
 
 def build_toolchain_badges(public_repos, limit: int = 8) -> list[str]:
@@ -315,109 +362,275 @@ def build_toolchain_badges(public_repos, limit: int = 8) -> list[str]:
     return [build_language_badge(lang) for lang, _ in ranked]
 
 
-def generate_profile_readme(repos):
+def detect_tech_stack_badges(public_repos, limit: int = 10) -> list[str]:
+    hits = Counter()
+    for repo in public_repos:
+        raw = " ".join([
+            repo.get("name") or "",
+            repo.get("description") or "",
+            repo.get("language") or "",
+            " ".join(repo.get("topics") or []),
+        ])
+        normalized = re.sub(r"[^a-z0-9]+", " ", raw.lower()).strip()
+        tokens = set(normalized.split()) if normalized else set()
+        for label, rule_tokens, rule_phrases, *_ in TECH_STACK_RULES:
+            if (tokens & rule_tokens) or any(p in normalized for p in rule_phrases):
+                hits[label] += 1
+
+    if not hits:
+        return []
+
+    rule_by_label = {r[0]: r for r in TECH_STACK_RULES}
+    ranked = sorted(hits.items(), key=lambda item: (-item[1], item[0].lower()))[:limit]
+    badges = []
+    for label, _ in ranked:
+        _, _, _, color, logo, logo_color = rule_by_label[label]
+        badges.append(_build_badge(label, color, logo, logo_color))
+    return badges
+
+
+def _render_progress_bar(count: int, total: int, width: int = 12) -> str:
+    if total <= 0:
+        return "░" * width
+    filled = round((count / total) * width)
+    filled = max(1 if count > 0 else 0, min(width, filled))
+    return ("█" * filled) + ("░" * (width - filled))
+
+
+def _select_featured_repos(public_repos, owner: str, limit: int = 10):
+    candidates = [
+        r for r in public_repos
+        if (r.get("name") or "").lower() != owner.lower()
+    ]
+    # Prioritize repos with a meaningful description so every showcase row tells a clear story
+    with_desc = [r for r in candidates if _clean_description(r.get("description")) != "-"]
+    without_desc = [r for r in candidates if _clean_description(r.get("description")) == "-"]
+    with_desc.sort(key=lambda r: (r.get("updated_at") or "", r.get("stargazers_count", 0)), reverse=True)
+    without_desc.sort(key=lambda r: (r.get("stargazers_count", 0), r.get("updated_at") or ""), reverse=True)
+    return (with_desc + without_desc)[:limit]
+
+
+def _adaptive_picture(dark_src: str, light_src: str, alt: str, height: int | None = None) -> str:
+    height_attr = f' height="{height}"' if height else ""
+    return (
+        "<picture>"
+        f'<source media="(prefers-color-scheme: dark)" srcset="{dark_src}">'
+        f'<source media="(prefers-color-scheme: light)" srcset="{light_src}">'
+        f'<img alt="{alt}" src="{light_src}"{height_attr}>'
+        "</picture>"
+    )
+
+
+def generate_profile_readme(repos, profile=None):
     now_dt = datetime.now(timezone.utc)
     now = now_dt.strftime("%Y-%m-%d")
     public_repos, private_repos = split_repos(repos)
     total = len(public_repos) + len(private_repos)
     cache_bust = now_dt.strftime("%Y%m%d%H%M")
 
-    header_text = quote(OWNER)
-    header_desc = quote("Developer · Open Source · Building cool things")
-    header = f"![Header](https://capsule-render.vercel.app/api?type=waving&height=220&color=gradient&customColorList=6,12,20,24&text={header_text}&fontColor=ffffff&fontSize=40&fontAlignY=35&desc={header_desc}&descAlignY=55&animation=fadeIn)"
+    prof = sanitize_profile(profile, OWNER, len(public_repos))
+    display_name = (prof.get("name") or OWNER).strip()
+    bio = " ".join((prof.get("bio") or "").split())
 
-    typing = "[![Typing SVG](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=2800&pause=800&color=70A5FD&center=true&vCenter=true&repeat=true&width=750&lines=Building+projects+and+exploring+new+tech;Managing+repositories+with+this+dashboard;Open+to+collaboration)](https://git.io/typing-svg)"
+    cat_counts = Counter(categorize_key(r) for r in public_repos)
+    top_domains = [
+        cat for cat, _ in sorted(cat_counts.items(), key=lambda x: (-x[1], x[0]))
+        if cat != "Other"
+    ][:3]
+    domain_summary = " · ".join(top_domains) if top_domains else "Software Engineering · Open Source"
+
+    header_subtitle = bio if (bio and len(bio) <= 72) else f"{domain_summary} · Building Real Systems"
+    header = (
+        "![Header](https://capsule-render.vercel.app/api?type=waving&height=205"
+        "&color=0:0f172a,50:1d4ed8,100:6d28d9"
+        f"&text={quote(display_name)}&fontColor=ffffff&fontSize=42&fontAlignY=36"
+        f"&desc={quote(header_subtitle)}&descAlignY=58&descSize=16&animation=fadeIn)"
+    )
+
+    typing_lines = [
+        f"Hi, I'm {display_name}",
+        domain_summary,
+        (
+            f"{len(public_repos)} Public & {len(private_repos)} Private Projects"
+            if private_repos
+            else f"Shipping across {len(public_repos)} Public Repositories"
+        ),
+        "Open to Collaboration & Interesting Problems",
+    ]
+    encoded_typing = ";".join(quote(line, safe="") for line in typing_lines)
+    typing = (
+        f"[![Typing SVG](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600"
+        f"&size=20&duration=2600&pause=900&color=4F46E5&center=true&vCenter=true&repeat=true&width=680"
+        f"&lines={encoded_typing})](https://github.com/{OWNER})"
+    )
 
     dashboard_url = f"https://{OWNER}.github.io/{REPO_NAME}/"
     source_url = f"https://github.com/{OWNER}/{REPO_NAME}"
     workflow_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions/workflows/update-dashboard.yml"
-    profile_views = f"https://komarev.com/ghpvc/?username={OWNER}&style=for-the-badge&color=7c3aed&label=PROFILE+VIEWS"
+    profile_views = f"https://komarev.com/ghpvc/?username={OWNER}&style=for-the-badge&color=6d28d9&label=VIEWS"
 
+    top_badges = [
+        f'<a href="{dashboard_url}"><img alt="Interactive Dashboard" src="https://img.shields.io/badge/Interactive_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white"></a>',
+    ]
+    blog_url = _safe_http_url(prof.get("blog"))
+    if blog_url:
+        top_badges.append(
+            f'<a href="{blog_url}"><img alt="Website" src="https://img.shields.io/badge/Website-0F172A?style=for-the-badge&logo=googlechrome&logoColor=white"></a>'
+        )
+    if prof.get("twitter_username"):
+        tw = prof["twitter_username"].lstrip("@")
+        top_badges.append(
+            f'<a href="https://x.com/{quote(tw)}"><img alt="X" src="https://img.shields.io/badge/@{_shields_escape(tw)}-000000?style=for-the-badge&logo=x&logoColor=white"></a>'
+        )
+    top_badges.append(f'<img alt="Profile Views" src="{profile_views}">')
+
+    meta_parts = []
+    if prof.get("location"):
+        meta_parts.append(f"📍 {prof['location']}")
+    if prof.get("company"):
+        meta_parts.append(f"🏢 {prof['company']}")
+    repo_meta = (
+        f"📦 {total} repos ({len(public_repos)} public · {len(private_repos)} private)"
+        if private_repos
+        else f"📦 {len(public_repos)} public repos"
+    )
+    meta_parts.append(repo_meta)
+    meta_parts.append(f"🕒 Synced {now}")
+
+    # Adaptive light/dark GitHub stats cards (side-by-side)
+    stats_dark = (
+        f"https://github-readme-stats.vercel.app/api?username={OWNER}"
+        f"&show_icons=true&include_all_commits=true&count_private=true"
+        f"&theme=tokyonight&hide_border=true&bg_color=0d1117&cache_bust={cache_bust}"
+    )
+    stats_light = (
+        f"https://github-readme-stats.vercel.app/api?username={OWNER}"
+        f"&show_icons=true&include_all_commits=true&count_private=true"
+        f"&theme=default&border_color=d0d7de&bg_color=ffffff&title_color=1d4ed8&icon_color=4f46e5&cache_bust={cache_bust}"
+    )
+    langs_dark = (
+        f"https://github-readme-stats.vercel.app/api/top-langs/?username={OWNER}"
+        f"&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&bg_color=0d1117&cache_bust={cache_bust}"
+    )
+    langs_light = (
+        f"https://github-readme-stats.vercel.app/api/top-langs/?username={OWNER}"
+        f"&layout=compact&langs_count=8&theme=default&border_color=d0d7de&bg_color=ffffff&title_color=1d4ed8&cache_bust={cache_bust}"
+    )
+    trophies_dark = (
+        f"https://github-profile-trophy.vercel.app/?username={OWNER}"
+        f"&theme=tokyonight&no-frame=true&no-bg=true&row=1&column=6&margin-w=6&cache_bust={cache_bust}"
+    )
+    trophies_light = (
+        f"https://github-profile-trophy.vercel.app/?username={OWNER}"
+        f"&theme=flat&no-frame=true&no-bg=true&row=1&column=6&margin-w=6&cache_bust={cache_bust}"
+    )
     snake_dark = f"https://raw.githubusercontent.com/{OWNER}/{OWNER}/output/github-contribution-grid-snake-dark.svg"
+    snake_light = f"https://raw.githubusercontent.com/{OWNER}/{OWNER}/output/github-contribution-grid-snake.svg"
 
-    stats_url = f"https://github-readme-stats.vercel.app/api?username={OWNER}&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0d1117&cache_bust={cache_bust}"
-    langs_url = f"https://github-readme-stats.vercel.app/api/top-langs/?username={OWNER}&layout=compact&theme=tokyonight&hide_border=true&bg_color=0d1117&cache_bust={cache_bust}"
-    trophies_url = f"https://github-profile-trophy.vercel.app/?username={OWNER}&theme=tokyonight&no-frame=true&no-bg=true&margin-w=4&cache_bust={cache_bust}"
-
-    toolchain_badges = build_toolchain_badges(public_repos)
+    language_badges = build_toolchain_badges(public_repos)
+    tech_badges = detect_tech_stack_badges(public_repos)
+    featured = _select_featured_repos(public_repos, OWNER, limit=10)
 
     lines = [
-        "<div align=\"center\">",
+        '<div align="center">',
         "",
         header,
         "",
         typing,
         "",
-        f"<a href=\"https://github.com/{OWNER}\"><img src=\"https://img.shields.io/badge/GitHub-{OWNER}-181717?style=for-the-badge&logo=github&logoColor=white\"></a>",
-        f"<a href=\"{dashboard_url}\"><img src=\"https://img.shields.io/badge/📊_View_Dashboard-blue?style=for-the-badge\"></a>",
-        f"<img src=\"{profile_views}\">",
+        " ".join(top_badges),
         "",
-        "```text",
-        f"📍 GitHub User: {OWNER}",
-        "```",
+        f"<sub>{' &nbsp;·&nbsp; '.join(meta_parts)}</sub>",
         "",
         "</div>",
         "",
-        "## `> whoami`",
+        "---",
         "",
-        f"This profile is auto-generated by the [Repos Dashboard]({source_url}). It shows an overview of repositories, categories, and activity.",
+        "### 🧑‍💻 About & Focus",
         "",
-        "```mermaid",
-        "flowchart LR",
-        "    REPOS[\"Your Repositories\"] --> DASH[\"Repos Dashboard\"]",
-        "    DASH --> PROFILE[\"This Profile\"]",
-        "```",
-        "",
-        "## `> toolchain`",
-        "",
-        "<div align=\"center\">",
-        "",
-        "### Languages & Tools",
-        "",
-        *toolchain_badges,
-        "",
-        "</div>",
-        "",
-        "## `> github stats`",
-        "",
-        "<div align=\"center\">",
-        "",
-        f"![GitHub Stats]({stats_url})",
-        "",
-        f"![Top Languages]({langs_url})",
-        "",
-        "</div>",
-        "",
-        "## `> trophies`",
-        "",
-        "<div align=\"center\">",
-        "",
-        f"![Trophies]({trophies_url})",
-        "",
-        "</div>",
-        "",
-        "## `> stats`",
-        "",
-        f"**Total repositories**: {total} ({len(public_repos)} public / {len(private_repos)} private)  ",
-        f"**Last updated**: {now}",
-        "",
-        "### Categories",
-        ""
     ]
 
-    groups = defaultdict(int)
-    for r in public_repos:
-        groups[categorize(r)] += 1
-    for cat, count in sorted(groups.items(), key=lambda x: -x[1]):
-        lines.append(f"- {cat}: **{count}**")
+    if bio:
+        lines.append(f"> {bio}")
+        lines.append("")
+
+    if top_domains:
+        focus_items = ", ".join(f"**{CATEGORY_LABELS[c]}** ({cat_counts[c]})" for c in top_domains)
+        lines.append(
+            f"Building software across {focus_items}. Explore the full searchable catalog, charts, and interactive Knowledge Graph on the **[Web Dashboard]({dashboard_url})**."
+        )
+    else:
+        lines.append(
+            f"Explore the full searchable catalog, charts, and interactive Knowledge Graph on the **[Web Dashboard]({dashboard_url})**."
+        )
+
+    lines.extend([
+        "",
+        "| Domain | Public Repos | Share |",
+        "|--------|-------------:|-------|",
+    ])
+    public_total = len(public_repos)
+    for cat_key, count in sorted(cat_counts.items(), key=lambda x: (-x[1], x[0])):
+        pct = round((count / public_total) * 100) if public_total else 0
+        bar = _render_progress_bar(count, public_total)
+        lines.append(f"| {CATEGORY_LABELS[cat_key]} | **{count}** | `{bar}` {pct}% |")
+
+    lines.extend([
+        "",
+        "### 🛠️ Tech Stack & Domains",
+        "",
+        '<div align="center">',
+        "",
+        "**Languages**",
+        "",
+        " ".join(language_badges),
+        "",
+    ])
+
+    if tech_badges:
+        lines.extend([
+            "**Engines, Frameworks & AI Tools**",
+            "",
+            " ".join(tech_badges),
+            "",
+        ])
+
+    lines.extend([
+        "</div>",
+        "",
+        "### 🌟 Featured & Recent Projects",
+        "",
+    ])
+    if featured:
+        lines.extend([
+            "| Project | Category | Language | Highlights | Updated |",
+            "|---------|----------|----------|------------|---------|",
+        ])
+        for r in featured:
+            name = r["name"]
+            url = r["html_url"]
+            stars = r.get("stargazers_count", 0)
+            star_tag = f" ⭐ {stars}" if stars > 0 else ""
+            lang = r.get("language") or "-"
+            updated = (r.get("updated_at") or "")[:10]
+            cat = categorize(r)
+            desc = _clean_description(r.get("description"))[:90].replace("|", "/")
+            lines.append(f"| [**{name}**]({url}){star_tag} | {cat} | `{lang}` | {desc} | `{updated}` |")
+    else:
+        lines.append("_No public repositories yet._")
+
+    lines.extend([
+        "",
+        f"<sub>👉 <a href=\"{dashboard_url}\">Xem toàn bộ {len(public_repos)} public repos, biểu đồ & Knowledge Graph trên Dashboard</a></sub>",
+    ])
 
     if private_repos:
         lines.extend([
             "",
-            f"## `> private repos` ({len(private_repos)})",
+            f"### 🔒 Private Projects ({len(private_repos)})",
             "",
             "| Repo | Tác dụng |",
-            "|------|----------|"
+            "|------|----------|",
         ])
         for r in private_repos:
             name = r["name"].replace("|", "/")
@@ -426,42 +639,35 @@ def generate_profile_readme(repos):
 
     lines.extend([
         "",
-        "## `> recent repos`",
+        "### 📊 GitHub Analytics",
         "",
-        "| Repo | Language | Updated | Stars | Category |",
-        "|------|----------|---------|-------|----------|"
-    ])
-    recent = sorted(public_repos, key=lambda x: x.get("updated_at") or "", reverse=True)[:12]
-    for r in recent:
-        name = r["name"]
-        lang = r.get("language") or "-"
-        updated = (r.get("updated_at") or "")[:10]
-        stars = r.get("stargazers_count", 0)
-        cat = categorize(r)
-        url = r["html_url"]
-        lines.append(f"| [{name}]({url}) | {lang} | {updated} | {stars} | {cat} |")
-
-    lines.extend([
+        '<p align="center">',
+        f'  {_adaptive_picture(stats_dark, stats_light, "GitHub Stats", height=175)}',
+        f'  {_adaptive_picture(langs_dark, langs_light, "Top Languages", height=175)}',
+        "</p>",
         "",
-        "## `> contribution snake`",
+        '<p align="center">',
+        f'  {_adaptive_picture(trophies_dark, trophies_light, "GitHub Trophies")}',
+        "</p>",
         "",
-        "<div align=\"center\">",
+        "### 🐍 Contribution Activity",
         "",
-        "<picture>",
-        f"  <source media=\"(prefers-color-scheme: dark)\" srcset=\"{snake_dark}\">",
-        f"  <img alt=\"Contribution snake\" src=\"{snake_dark}\">",
-        "</picture>",
+        '<div align="center">',
+        "",
+        _adaptive_picture(snake_dark, snake_light, "Contribution snake"),
         "",
         "</div>",
         "",
-        "<div align=\"center\">",
+        "---",
         "",
-        f"[![Update Profile](https://img.shields.io/badge/🔄_Update_Profile-success?style=for-the-badge)]({workflow_url})",
-        f"[![Manage Dashboard](https://img.shields.io/badge/🔧_Manage_Dashboard-green?style=for-the-badge)]({source_url})",
+        '<div align="center">',
         "",
-        "![Footer](https://capsule-render.vercel.app/api?type=waving&height=100&section=footer&color=gradient&customColorList=6,12,20,24&animation=fadeIn)",
+        f"[![Refresh Profile](https://img.shields.io/badge/Refresh_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_url})",
+        f"[![Dashboard Source](https://img.shields.io/badge/Dashboard_Source-1E293B?style=for-the-badge&logo=github&logoColor=white)]({source_url})",
         "",
-        "</div>"
+        "![Footer](https://capsule-render.vercel.app/api?type=waving&height=95&section=footer&color=0:0f172a,50:1d4ed8,100:6d28d9&animation=fadeIn)",
+        "",
+        "</div>",
     ])
     return "\n".join(lines)
 
@@ -679,5 +885,5 @@ if __name__ == "__main__":
     write_dashboard_json(profile, public_repos, private_repos)
     print("data/dashboard.json updated")
 
-    profile_content = generate_profile_readme(repos)
+    profile_content = generate_profile_readme(repos, profile)
     update_profile_readme(profile_content)
