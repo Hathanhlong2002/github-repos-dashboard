@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>GitHub Repos Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
@@ -28,22 +29,49 @@
     input, select, button { padding: 8px 12px; border-radius: 6px; border: 1px solid #30363d; background: #161b22; color: #e6edf3; }
     button { cursor: pointer; background: #238636; border-color: #238636; }
     button:hover { background: #2ea043; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    .btn-secondary { background: #21262d; border-color: #30363d; }
+    .btn-secondary:hover { background: #30363d; }
+    .table-wrapper { overflow: auto; max-inline-size: 100%; max-block-size: min(560px, 75vh); container-type: inline-size; border: 1px solid #21262d; border-radius: 8px; }
+    .table-wrapper:focus-visible { outline: 2px solid #58a6ff; outline-offset: 2px; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+    thead { position: sticky; inset-block-start: 0; z-index: 2; }
     th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #21262d; vertical-align: top; }
-    th { background: #161b22; }
+    thead th { background: #161b22; }
+    tbody th { position: sticky; inset-inline-start: 0; z-index: 1; background: #0d1117; font-weight: 600; }
+    .private-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 16px 0 20px 0; }
+    .private-box h3 { margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px; }
+    .private-note { color: #8b949e; font-size: 13px; margin: 0 0 12px 0; }
+    .private-table { --label-2: "Tác dụng"; }
+    .public-table { --label-2: "Nhóm"; --label-3: "Language"; --label-4: "Cập nhật"; --label-5: "Stars"; --label-6: "Forks"; --label-7: "Issues"; --label-8: "Visibility"; --label-9: "Mô tả"; }
     a { color: #58a6ff; text-decoration: none; }
     a:hover { text-decoration: underline; }
     .badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; }
     .private { background: #da3633; }
     .public { background: #238636; }
     .status { margin: 10px 0; color: #8b949e; white-space: pre-wrap; }
-    .commit { font-size: 12px; color: #8b949e; margin-top: 4px; }
+    .empty-row { color: #8b949e; font-style: italic; }
+    @container (width < 600px) {
+      table, thead, tbody, tr, th, td { display: block; }
+      thead { display: none; }
+      tr { margin-block-end: 1rem; border: 1px solid #30363d; border-radius: 6px; overflow: hidden; }
+      tbody th { position: sticky; inset-block-start: 0; z-index: 2; background: #161b22; }
+      td::before { color: #8b949e; font-weight: 600; }
+      .private-table td:nth-child(2)::before { content: var(--label-2) ": "; }
+      .public-table td:nth-child(2)::before { content: var(--label-2) ": "; }
+      .public-table td:nth-child(3)::before { content: var(--label-3) ": "; }
+      .public-table td:nth-child(4)::before { content: var(--label-4) ": "; }
+      .public-table td:nth-child(5)::before { content: var(--label-5) ": "; }
+      .public-table td:nth-child(6)::before { content: var(--label-6) ": "; }
+      .public-table td:nth-child(7)::before { content: var(--label-7) ": "; }
+      .public-table td:nth-child(8)::before { content: var(--label-8) ": "; }
+      .public-table td:nth-child(9)::before { content: var(--label-9) ": "; }
+    }
     @media (max-width: 700px) { .charts { grid-template-columns: 1fr; } .profile-header { flex-direction: column; } }
   </style>
 </head>
 <body>
   <h1>📊 GitHub Repos Dashboard</h1>
-  <p class="subtitle">Xem đầy đủ thông tin user + biểu đồ + knowledge graph + danh sách repo.</p>
+  <p class="subtitle">Đọc snapshot tĩnh không tốn rate limit, hỗ trợ làm mới trực tiếp qua GitHub API khi cần.</p>
 
   <div class="profile-box" id="profileBox" style="display:none;">
     <h3>👤 Hồ sơ chi tiết</h3>
@@ -67,10 +95,11 @@
   </div>
 
   <div class="controls">
-    <input type="text" id="username" placeholder="Username (tự động nhận nếu đang chạy trên GitHub Pages)" value="" style="min-width:280px;">
-    <input type="password" id="token" placeholder="Token (bắt buộc nếu bị rate limit)">
-    <button onclick="loadRepos()">Tải Dashboard</button>
-    <select id="filter" onchange="renderTable()">
+    <input type="text" id="username" placeholder="Username (tự động nhận nếu đang chạy trên GitHub Pages)" value="" style="min-width:280px;" autocomplete="username">
+    <input type="password" id="token" placeholder="Token (tùy chọn — kéo live + private repo)" autocomplete="off" spellcheck="false">
+    <button type="button" id="loadBtn">Tải Dashboard</button>
+    <button type="button" id="liveBtn" class="btn-secondary">Làm mới Live API</button>
+    <select id="filter" aria-label="Lọc theo nhóm">
       <option value="all">Tất cả nhóm</option>
       <option value="Unity / Game">Unity / Game</option>
       <option value="AI / ML">AI / ML</option>
@@ -78,34 +107,138 @@
       <option value="Web / Frontend">Web / Frontend</option>
       <option value="Other">Khác</option>
     </select>
-    <select id="sort" onchange="renderTable()">
+    <select id="sort" aria-label="Sắp xếp repository">
       <option value="updated">Sort: Mới nhất</option>
       <option value="stars">Sort: Nhiều star</option>
       <option value="name">Sort: Tên A-Z</option>
     </select>
-    <input type="text" id="search" placeholder="Tìm kiếm..." oninput="renderTable()">
+    <input type="text" id="search" placeholder="Tìm kiếm..." aria-label="Tìm kiếm repository">
   </div>
 
   <div class="status" id="status">Đang tự động tải...</div>
-  <table id="table">
-    <thead>
-      <tr>
-        <th>Repo</th>
-        <th>Nhóm</th>
-        <th>Language</th>
-        <th>Cập nhật</th>
-        <th>Stars</th>
-        <th>Forks</th>
-        <th>Issues</th>
-        <th>Visibility</th>
-        <th>Mô tả</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+
+  <section class="private-box" id="privateBox" style="display:none;">
+    <h3 id="privateHeading">🔒 Private Repos</h3>
+    <p class="private-note">Chỉ hiển thị tên và tác dụng của các private repository.</p>
+    <div tabindex="0" role="region" aria-labelledby="privateHeading" class="table-wrapper">
+      <table id="privateTable" class="private-table">
+        <thead>
+          <tr>
+            <th scope="col">Tên Repo</th>
+            <th scope="col">Tác dụng</th>
+          </tr>
+        </thead>
+        <tbody id="privateTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div tabindex="0" role="region" aria-label="Danh sách public repositories" class="table-wrapper">
+    <table id="table" class="public-table">
+      <thead>
+        <tr>
+          <th scope="col">Repo</th>
+          <th scope="col">Nhóm</th>
+          <th scope="col">Language</th>
+          <th scope="col">Cập nhật</th>
+          <th scope="col">Stars</th>
+          <th scope="col">Forks</th>
+          <th scope="col">Issues</th>
+          <th scope="col">Visibility</th>
+          <th scope="col">Mô tả</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
 
   <script>
+    // Unified categorization rules — kept strictly identical with scripts/update_dashboard.py.
+    const TOPIC_MAP = {
+      unity: "Unity / Game",
+      unity3d: "Unity / Game",
+      game: "Unity / Game",
+      gamedev: "Unity / Game",
+      shader: "Unity / Game",
+      webgl: "Unity / Game",
+      threejs: "Unity / Game",
+      ai: "AI / ML",
+      ml: "AI / ML",
+      "machine-learning": "AI / ML",
+      "deep-learning": "AI / ML",
+      llm: "AI / ML",
+      gpt: "AI / ML",
+      openai: "AI / ML",
+      bedrock: "AI / ML",
+      nlp: "AI / ML",
+      "computer-vision": "AI / ML",
+      "data-science": "AI / ML",
+      bot: "Bot / Mini App",
+      zalo: "Bot / Mini App",
+      miniapp: "Bot / Mini App",
+      "mini-app": "Bot / Mini App",
+      telegram: "Bot / Mini App",
+      discord: "Bot / Mini App",
+      react: "Web / Frontend",
+      nextjs: "Web / Frontend",
+      vue: "Web / Frontend",
+      svelte: "Web / Frontend",
+      angular: "Web / Frontend",
+      frontend: "Web / Frontend",
+      web: "Web / Frontend",
+      html: "Web / Frontend",
+      css: "Web / Frontend"
+    };
+
+    const KEYWORD_RULES = [
+      {
+        category: "Unity / Game",
+        tokens: new Set([
+          "unity", "unity3d", "game", "gamedev", "shader", "shaderlab",
+          "webgl", "threejs", "fps", "dungeon", "survivor", "zombie",
+          "platformer", "metroidvania", "urp", "photon"
+        ]),
+        phrases: ["unity", "shader", "three js", "game", "platformer", "metroidvania", "farming"]
+      },
+      {
+        category: "AI / ML",
+        tokens: new Set([
+          "ai", "ml", "llm", "gpt", "openai", "bedrock", "gemini",
+          "onnx", "gnn", "opencv", "chatbot", "rag", "agent", "agents", "whisper"
+        ]),
+        phrases: ["machine learning", "deep learning", "data science", "voice agent", "neural", "bedrock", "openai", "chatbot"]
+      },
+      {
+        category: "Bot / Mini App",
+        tokens: new Set(["zalo", "bot", "miniapp", "telegram", "discord"]),
+        phrases: ["mini app", "miniapp", "zalo"]
+      },
+      {
+        category: "Web / Frontend",
+        tokens: new Set(["react", "nextjs", "vue", "svelte", "angular", "frontend", "html", "css", "tailwind", "dashboard"]),
+        phrases: ["next js", "frontend", "tailwind"]
+      }
+    ];
+
+    const LANGUAGE_MAP = {
+      "c#": "Unity / Game",
+      shaderlab: "Unity / Game",
+      hlsl: "Unity / Game",
+      glsl: "Unity / Game",
+      gdscript: "Unity / Game",
+      python: "AI / ML",
+      "jupyter notebook": "AI / ML",
+      html: "Web / Frontend",
+      css: "Web / Frontend",
+      scss: "Web / Frontend",
+      javascript: "Web / Frontend",
+      typescript: "Web / Frontend",
+      vue: "Web / Frontend",
+      svelte: "Web / Frontend"
+    };
+
     let allRepos = [];
+    let privateRepos = [];
     let userProfile = null;
     let catChart = null;
     let langChart = null;
@@ -119,6 +252,11 @@
       return "";
     }
 
+    function detectRepoName() {
+      const segments = window.location.pathname.split("/").filter(Boolean);
+      return segments[0] || "github-repos-dashboard";
+    }
+
     function extractUsername(input) {
       if (!input) return detectUsername() || "";
       input = input.trim();
@@ -128,12 +266,42 @@
       return input;
     }
 
+    function cleanDescription(desc) {
+      const cleaned = String(desc || "").replace(/\s+/g, " ").trim();
+      return cleaned || "-";
+    }
+
+    // Private repos retain ONLY name and description (tác dụng).
+    function sanitizePrivateRepo(repo) {
+      return {
+        name: String(repo?.name || "-").trim() || "-",
+        description: cleanDescription(repo?.description)
+      };
+    }
+
     function categorize(repo) {
-      const text = ((repo.name || "") + " " + (repo.description || "") + " " + (repo.language || "")).toLowerCase();
-      if (text.includes("unity") || text.includes("game") || text.includes("shader")) return "Unity / Game";
-      if (text.includes("ai") || text.includes("ml") || text.includes("learning") || text.includes("gpt") || text.includes("llm")) return "AI / ML";
-      if (text.includes("zalo") || text.includes("bot") || text.includes("miniapp")) return "Bot / Mini App";
-      if (text.includes("react") || text.includes("web") || text.includes("frontend") || text.includes("html")) return "Web / Frontend";
+      const topics = Array.isArray(repo?.topics) ? repo.topics : [];
+      for (const rawTopic of topics) {
+        const topic = String(rawTopic || "").toLowerCase();
+        if (Object.prototype.hasOwnProperty.call(TOPIC_MAP, topic)) {
+          return TOPIC_MAP[topic];
+        }
+      }
+
+      const rawText = `${repo?.name || ""} ${repo?.description || ""}`;
+      const normalized = rawText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      const tokens = normalized ? normalized.split(" ") : [];
+
+      for (const rule of KEYWORD_RULES) {
+        if (tokens.some(t => rule.tokens.has(t))) return rule.category;
+        if (rule.phrases.some(p => normalized.includes(p))) return rule.category;
+      }
+
+      const lang = String(repo?.language || "").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(LANGUAGE_MAP, lang)) {
+        return LANGUAGE_MAP[lang];
+      }
+
       return "Other";
     }
 
@@ -143,10 +311,30 @@
       return `${years} năm`;
     }
 
-    function fixUrl(url) {
+    function safeHttpUrl(url) {
       if (!url) return "";
-      if (url.startsWith("http://") || url.startsWith("https://")) return url;
-      return "https://" + url;
+      const candidate = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      try {
+        const parsed = new URL(candidate);
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+          return parsed.href;
+        }
+      } catch (_) {}
+      return "";
+    }
+
+    function createProfileItem(label, valueNodeOrText) {
+      const item = document.createElement("div");
+      item.className = "profile-item";
+      const strong = document.createElement("strong");
+      strong.textContent = label;
+      item.appendChild(strong);
+      if (valueNodeOrText instanceof Node) {
+        item.appendChild(valueNodeOrText);
+      } else {
+        item.appendChild(document.createTextNode(String(valueNodeOrText)));
+      }
+      return item;
     }
 
     function updateKnowledgeGraph() {
@@ -154,7 +342,7 @@
       const edges = [];
       const nodeIds = new Set();
 
-      nodes.push({ id: "user", label: userProfile?.login || "User", color: "#58a6ff", size: 35, font: { color: "#fff", size: 16 } });
+      nodes.push({ id: "user", label: String(userProfile?.login || "User"), color: "#58a6ff", size: 35, font: { color: "#fff", size: 16 } });
       nodeIds.add("user");
 
       const cats = {};
@@ -166,20 +354,20 @@
 
       Object.keys(cats).forEach(cat => {
         const id = "cat_" + cat;
-        nodes.push({ id, label: cat, color: "#238636", size: 22 + cats[cat], font: { color: "#fff" } });
+        nodes.push({ id, label: String(cat), color: "#238636", size: 22 + cats[cat], font: { color: "#fff" } });
         edges.push({ from: "user", to: id });
         nodeIds.add(id);
       });
 
-      Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0, 6).forEach(([lang, count]) => {
+      Object.entries(langs).sort((a, b) => b[1] - a[1]).slice(0, 6).forEach(([lang, count]) => {
         const id = "lang_" + lang;
-        nodes.push({ id, label: lang, color: "#d29922", size: 16 + count, font: { color: "#fff" } });
+        nodes.push({ id, label: String(lang), color: "#d29922", size: 16 + count, font: { color: "#fff" } });
         nodeIds.add(id);
       });
 
       allRepos.slice(0, 10).forEach(r => {
         const id = "repo_" + r.name;
-        nodes.push({ id, label: r.name, color: "#8957e5", size: 14, font: { color: "#fff", size: 11 } });
+        nodes.push({ id, label: String(r.name), color: "#8957e5", size: 14, font: { color: "#fff", size: 11 } });
         const catId = "cat_" + r.category;
         if (nodeIds.has(catId)) edges.push({ from: catId, to: id });
         if (r.language) {
@@ -211,7 +399,7 @@
 
       const catLabels = Object.keys(counts);
       const catData = Object.values(counts);
-      const langEntries = Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0, 6);
+      const langEntries = Object.entries(langs).sort((a, b) => b[1] - a[1]).slice(0, 6);
       const langLabels = langEntries.map(e => e[0]);
       const langData = langEntries.map(e => e[1]);
 
@@ -242,62 +430,168 @@
       if (!userProfile) return;
       const joinDate = userProfile.created_at ? new Date(userProfile.created_at).toLocaleDateString("vi-VN") : "-";
       const age = getAccountAge(userProfile.created_at);
-      const blogUrl = fixUrl(userProfile.blog);
+      const blogUrl = safeHttpUrl(userProfile.blog);
+      const avatarUrl = safeHttpUrl(userProfile.avatar_url);
 
-      document.getElementById("profileHeader").innerHTML = `
-        <img class="avatar" src="${userProfile.avatar_url}" alt="avatar">
-        <div>
-          <div style="font-size:18px; font-weight:600;">${userProfile.name || userProfile.login}</div>
-          <div style="color:#8b949e;">@${userProfile.login}</div>
-          ${userProfile.bio ? `<div style="margin-top:6px;">${userProfile.bio}</div>` : ""}
-        </div>
-      `;
+      const header = document.getElementById("profileHeader");
+      header.replaceChildren();
+      if (avatarUrl) {
+        const img = document.createElement("img");
+        img.className = "avatar";
+        img.src = avatarUrl;
+        img.alt = "avatar";
+        header.appendChild(img);
+      }
+      const meta = document.createElement("div");
+      const nameDiv = document.createElement("div");
+      nameDiv.style.fontSize = "18px";
+      nameDiv.style.fontWeight = "600";
+      nameDiv.textContent = userProfile.name || userProfile.login;
+      meta.appendChild(nameDiv);
 
-      document.getElementById("profileGrid").innerHTML = `
-        <div class="profile-item"><strong>Tham gia</strong>${joinDate} (${age})</div>
-        <div class="profile-item"><strong>Public repos</strong>${userProfile.public_repos || 0}</div>
-        <div class="profile-item"><strong>Followers</strong>${userProfile.followers || 0}</div>
-        <div class="profile-item"><strong>Following</strong>${userProfile.following || 0}</div>
-        <div class="profile-item"><strong>Company</strong>${userProfile.company || "-"}</div>
-        <div class="profile-item"><strong>Location</strong>${userProfile.location || "-"}</div>
-        <div class="profile-item"><strong>Blog</strong>${blogUrl ? `<a href="${blogUrl}" target="_blank">${userProfile.blog}</a>` : "-"}</div>
-        <div class="profile-item"><strong>Twitter</strong>${userProfile.twitter_username ? `@${userProfile.twitter_username}` : "-"}</div>
-      `;
+      const loginDiv = document.createElement("div");
+      loginDiv.style.color = "#8b949e";
+      loginDiv.textContent = `@${userProfile.login}`;
+      meta.appendChild(loginDiv);
+
+      if (userProfile.bio) {
+        const bioDiv = document.createElement("div");
+        bioDiv.style.marginTop = "6px";
+        bioDiv.textContent = userProfile.bio;
+        meta.appendChild(bioDiv);
+      }
+      header.appendChild(meta);
+
+      const grid = document.getElementById("profileGrid");
+      grid.replaceChildren();
+      grid.appendChild(createProfileItem("Tham gia", `${joinDate} (${age})`));
+      grid.appendChild(createProfileItem("Public repos", userProfile.public_repos ?? allRepos.length));
+      if (privateRepos.length > 0) {
+        grid.appendChild(createProfileItem("Private repos", privateRepos.length));
+      }
+      grid.appendChild(createProfileItem("Followers", userProfile.followers || 0));
+      grid.appendChild(createProfileItem("Following", userProfile.following || 0));
+      grid.appendChild(createProfileItem("Company", userProfile.company || "-"));
+      grid.appendChild(createProfileItem("Location", userProfile.location || "-"));
+      if (blogUrl) {
+        const link = document.createElement("a");
+        link.href = blogUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = userProfile.blog;
+        grid.appendChild(createProfileItem("Blog", link));
+      } else {
+        grid.appendChild(createProfileItem("Blog", "-"));
+      }
+      grid.appendChild(createProfileItem("Twitter", userProfile.twitter_username ? `@${userProfile.twitter_username}` : "-"));
 
       const langs = {};
       allRepos.forEach(r => { if (r.language) langs[r.language] = (langs[r.language] || 0) + 1; });
-      const topLangs = Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([l,c]) => `${l} (${c})`);
+      const topLangs = Object.entries(langs).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([l, c]) => `${l} (${c})`);
 
-      document.getElementById("skillSummary").innerHTML = `
-        <div><strong>Kỹ năng / Ngôn ngữ:</strong></div>
-        <div class="skills">${topLangs.map(l => `<span class="skill">${l}</span>`).join("") || "-"}</div>
-      `;
+      const skillSummary = document.getElementById("skillSummary");
+      skillSummary.replaceChildren();
+      const labelDiv = document.createElement("div");
+      const labelStrong = document.createElement("strong");
+      labelStrong.textContent = "Kỹ năng / Ngôn ngữ:";
+      labelDiv.appendChild(labelStrong);
+      skillSummary.appendChild(labelDiv);
+
+      const skillsDiv = document.createElement("div");
+      skillsDiv.className = "skills";
+      if (topLangs.length) {
+        topLangs.forEach(item => {
+          const span = document.createElement("span");
+          span.className = "skill";
+          span.textContent = item;
+          skillsDiv.appendChild(span);
+        });
+      } else {
+        skillsDiv.textContent = "-";
+      }
+      skillSummary.appendChild(skillsDiv);
 
       updateCharts();
       updateKnowledgeGraph();
       document.getElementById("profileBox").style.display = "block";
     }
 
-    async function loadRepos() {
-      let input = document.getElementById("username").value.trim();
+    async function loadDashboardSnapshot(expectedUsername) {
+      const candidates = [];
+      const hostOwner = detectUsername();
+      if (hostOwner) {
+        const repoName = detectRepoName();
+        candidates.push(`https://raw.githubusercontent.com/${encodeURIComponent(hostOwner)}/${encodeURIComponent(repoName)}/main/data/dashboard.json`);
+      }
+      candidates.push("./data/dashboard.json");
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, { cache: "no-cache" });
+          if (!res.ok) continue;
+          const payload = await res.json();
+          if (!payload || !payload.owner || !Array.isArray(payload.public_repos)) continue;
+          if (expectedUsername && payload.owner.toLowerCase() !== expectedUsername.toLowerCase()) {
+            continue;
+          }
+          return payload;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function applySnapshot(snapshot) {
+      userProfile = snapshot.profile || { login: snapshot.owner, public_repos: snapshot.public_repos.length };
+      allRepos = snapshot.public_repos.map(r => ({
+        ...r,
+        category: r.category || categorize(r)
+      }));
+      privateRepos = Array.isArray(snapshot.private_repos)
+        ? snapshot.private_repos.map(sanitizePrivateRepo).sort((a, b) => a.name.localeCompare(b.name))
+        : [];
+
+      const updatedLabel = snapshot.updated_at ? snapshot.updated_at.replace("T", " ").replace("Z", " UTC") : "-";
+      const countsText = privateRepos.length > 0
+        ? `${allRepos.length} public + ${privateRepos.length} private repo`
+        : `${allRepos.length} public repo`;
+      document.getElementById("username").value = snapshot.owner;
+      document.getElementById("status").textContent =
+        `Đã tải từ snapshot (${countsText} của ${snapshot.owner} · cập nhật ${updatedLabel}) — không tốn API rate limit`;
+
+      updateProfile();
+      renderPrivateTable();
+      renderTable();
+    }
+
+    async function loadRepos({ forceLive = false } = {}) {
+      const input = document.getElementById("username").value.trim();
       const username = extractUsername(input);
+      const token = document.getElementById("token").value.trim();
+      const status = document.getElementById("status");
+
+      // Prefer static snapshot when no PAT is entered and live refresh wasn't explicitly requested.
+      if (!forceLive && !token) {
+        const snapshot = await loadDashboardSnapshot(username || "");
+        if (snapshot) {
+          applySnapshot(snapshot);
+          return;
+        }
+      }
+
       if (!username) {
-        document.getElementById("status").textContent = "Không nhận diện được username. Hãy nhập thủ công.";
+        status.textContent = "Không tìm thấy snapshot hoặc username. Hãy nhập username rồi bấm Tải Dashboard.";
         return;
       }
       document.getElementById("username").value = username;
-
-      const token = document.getElementById("token").value.trim();
-      const status = document.getElementById("status");
-      status.textContent = `Đang tải user: ${username}...`;
+      status.textContent = `Đang tải live từ GitHub API cho user: ${username}...`;
 
       const headers = { "Accept": "application/vnd.github+json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       try {
-        const userRes = await fetch(`https://api.github.com/users/${username}`, { headers });
+        const userRes = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}`, { headers });
         if (userRes.status === 403) {
-          throw new Error("Bị rate limit (403). Hãy dán Personal Access Token vào ô Token rồi bấm Tải Dashboard lại.\n(Tạo token tại: github.com/settings/tokens — scope public_repo là đủ)");
+          throw new Error("Bị rate limit (403). Hãy dán Personal Access Token vào ô Token rồi bấm Làm mới Live API.\n(Tạo token tại: github.com/settings/tokens — scope repo để kéo cả private repo)");
         }
         if (!userRes.ok) {
           const errText = await userRes.text();
@@ -305,26 +599,109 @@
         }
         userProfile = await userRes.json();
 
+        let useAuthReposEndpoint = false;
+        if (token) {
+          const authRes = await fetch("https://api.github.com/user", { headers });
+          if (authRes.ok) {
+            const authUser = await authRes.json();
+            if ((authUser.login || "").toLowerCase() === username.toLowerCase()) {
+              useAuthReposEndpoint = true;
+            }
+          }
+        }
+
         let repos = [];
         let page = 1;
-        while (page <= 3) {
-          const res = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&page=${page}&sort=updated&type=owner`, { headers });
+        while (page <= 10) {
+          const endpoint = useAuthReposEndpoint
+            ? `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&affiliation=owner`
+            : `https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&page=${page}&sort=updated&type=owner`;
+          const res = await fetch(endpoint, { headers });
           if (!res.ok) throw new Error(`Repos HTTP ${res.status}`);
           const data = await res.json();
           if (!data.length) break;
-          repos = repos.concat(data);
+          const owned = useAuthReposEndpoint
+            ? data.filter(r => (r.owner?.login || "").toLowerCase() === username.toLowerCase())
+            : data;
+          repos = repos.concat(owned);
+          if (data.length < 100) break;
           page++;
         }
 
-        // No per-repo commit fetch to save rate limit
-        allRepos = repos.map(r => ({ ...r, category: categorize(r), lastCommit: "-" }));
+        allRepos = repos
+          .filter(r => !r.private)
+          .map(r => ({ ...r, category: categorize(r) }));
 
-        status.textContent = `Đã tải ${allRepos.length} repo của ${username}`;
+        if (useAuthReposEndpoint) {
+          privateRepos = repos
+            .filter(r => r.private)
+            .map(sanitizePrivateRepo)
+            .sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+          const snapshot = await loadDashboardSnapshot(username);
+          privateRepos = Array.isArray(snapshot?.private_repos)
+            ? snapshot.private_repos.map(sanitizePrivateRepo).sort((a, b) => a.name.localeCompare(b.name))
+            : [];
+        }
+
+        status.textContent = privateRepos.length > 0
+          ? `Đã tải live ${allRepos.length} public + ${privateRepos.length} private repo của ${username}`
+          : `Đã tải live ${allRepos.length} public repo của ${username}`;
+
         updateProfile();
+        renderPrivateTable();
         renderTable();
       } catch (e) {
         status.textContent = "Lỗi: " + e.message;
       }
+    }
+
+    function renderPrivateTable() {
+      const box = document.getElementById("privateBox");
+      const heading = document.getElementById("privateHeading");
+      const tbody = document.getElementById("privateTbody");
+      tbody.replaceChildren();
+
+      if (!privateRepos.length) {
+        box.style.display = "none";
+        return;
+      }
+
+      const search = document.getElementById("search").value.toLowerCase();
+      const filtered = privateRepos.filter(r => {
+        const text = `${r.name} ${r.description}`.toLowerCase();
+        return text.includes(search);
+      });
+
+      heading.textContent = search
+        ? `🔒 Private Repos (${filtered.length}/${privateRepos.length})`
+        : `🔒 Private Repos (${privateRepos.length})`;
+
+      if (!filtered.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 2;
+        td.className = "empty-row";
+        td.textContent = "Không khớp private repo nào.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      } else {
+        filtered.forEach(r => {
+          const tr = document.createElement("tr");
+          const th = document.createElement("th");
+          th.scope = "row";
+          th.textContent = r.name;
+
+          const td = document.createElement("td");
+          td.textContent = r.description;
+
+          tr.appendChild(th);
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+      }
+
+      box.style.display = "block";
     }
 
     function renderTable() {
@@ -332,43 +709,83 @@
       const search = document.getElementById("search").value.toLowerCase();
       const sort = document.getElementById("sort").value;
       const tbody = document.getElementById("tbody");
-      tbody.innerHTML = "";
+      tbody.replaceChildren();
 
-      let filtered = allRepos.filter(r => {
+      const filtered = allRepos.filter(r => {
         if (filter !== "all" && r.category !== filter) return false;
-        const text = (r.name + " " + (r.description || "")).toLowerCase();
+        const text = `${r.name} ${r.description || ""}`.toLowerCase();
         return text.includes(search);
       });
 
-      if (sort === "updated") filtered.sort((a,b) => (b.updated_at || "").localeCompare(a.updated_at || ""));
-      else if (sort === "stars") filtered.sort((a,b) => (b.stargazers_count || 0) - (a.stargazers_count || 0));
-      else if (sort === "name") filtered.sort((a,b) => a.name.localeCompare(b.name));
+      if (sort === "updated") filtered.sort((a, b) => (b.updated_at || "").localeCompare(a.updated_at || ""));
+      else if (sort === "stars") filtered.sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0));
+      else if (sort === "name") filtered.sort((a, b) => a.name.localeCompare(b.name));
 
       filtered.forEach(r => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><a href="${r.html_url}" target="_blank"><strong>${r.name}</strong></a></td>
-          <td>${r.category}</td>
-          <td>${r.language || "-"}</td>
-          <td>${(r.updated_at || "").slice(0, 10)}</td>
-          <td>${r.stargazers_count || 0}</td>
-          <td>${r.forks_count || 0}</td>
-          <td>${r.open_issues_count || 0}</td>
-          <td><span class="badge ${r.private ? "private" : "public"}">${r.private ? "Private" : "Public"}</span></td>
-          <td>${(r.description || "-").slice(0, 100)}</td>
-        `;
+
+        const nameCell = document.createElement("th");
+        nameCell.scope = "row";
+        const repoUrl = safeHttpUrl(r.html_url);
+        if (repoUrl) {
+          const a = document.createElement("a");
+          a.href = repoUrl;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.textContent = r.name;
+          nameCell.appendChild(a);
+        } else {
+          nameCell.textContent = r.name;
+        }
+        tr.appendChild(nameCell);
+
+        const cells = [
+          r.category,
+          r.language || "-",
+          (r.updated_at || "").slice(0, 10),
+          String(r.stargazers_count || 0),
+          String(r.forks_count || 0),
+          String(r.open_issues_count || 0)
+        ];
+        cells.forEach(val => {
+          const td = document.createElement("td");
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+
+        const visTd = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.className = "badge public";
+        badge.textContent = "Public";
+        visTd.appendChild(badge);
+        tr.appendChild(visTd);
+
+        const descTd = document.createElement("td");
+        descTd.textContent = cleanDescription(r.description).slice(0, 100);
+        tr.appendChild(descTd);
+
         tbody.appendChild(tr);
       });
     }
 
+    function bindEvents() {
+      document.getElementById("loadBtn").addEventListener("click", () => loadRepos({ forceLive: false }));
+      document.getElementById("liveBtn").addEventListener("click", () => loadRepos({ forceLive: true }));
+      document.getElementById("filter").addEventListener("change", renderTable);
+      document.getElementById("sort").addEventListener("change", renderTable);
+      document.getElementById("search").addEventListener("input", () => {
+        renderPrivateTable();
+        renderTable();
+      });
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
+      bindEvents();
       const detected = detectUsername();
       if (detected) {
         document.getElementById("username").value = detected;
-        setTimeout(loadRepos, 300);
-      } else {
-        document.getElementById("status").textContent = "Hãy nhập username rồi bấm Tải Dashboard";
       }
+      setTimeout(() => loadRepos({ forceLive: false }), 100);
     });
   </script>
 </body>

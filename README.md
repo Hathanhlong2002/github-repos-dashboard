@@ -37,9 +37,8 @@
 
 [![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)](https://github.com/HTL2910/github-repos-dashboard/settings/pages)
 
-1. Source: **Deploy from a branch**
-2. Branch: `main` / `/ (root)`
-3. Click **Save**
+1. Under **Build and deployment**, select Source: **GitHub Actions**
+2. The `Deploy to GitHub Pages` workflow packages only `index.html` and `data/dashboard.json` into `_site/` (never exposing `scripts/` or `README.md`)
 
 Dashboard will be available at: [https://HTL2910.github.io/github-repos-dashboard/](https://HTL2910.github.io/github-repos-dashboard/)
 
