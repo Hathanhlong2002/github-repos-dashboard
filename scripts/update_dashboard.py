@@ -457,6 +457,95 @@ def _resolve_snake_urls(owner: str, include_snake: bool | None = None):
     )
 
 
+def _mermaid_escape(text: str) -> str:
+    cleaned = " ".join((text or "").split())
+    cleaned = re.sub(r'["`<>[\](){};]', " ", cleaned)
+    cleaned = " ".join(cleaned.split())
+    return cleaned or "-"
+
+
+def build_profile_mermaid(display_name: str, public_repos: list[dict], private_count: int, owner: str) -> list[str]:
+    candidates = [
+        r for r in public_repos
+        if (r.get("name") or "").lower() != owner.lower()
+    ]
+    if not candidates:
+        return []
+
+    by_category = defaultdict(list)
+    for repo in candidates:
+        by_category[categorize_key(repo)].append(repo)
+
+    non_other = [
+        (cat_key, items) for cat_key, items in by_category.items()
+        if cat_key != "Other"
+    ]
+    selected_categories = (
+        sorted(non_other, key=lambda item: (-len(item[1]), item[0]))
+        if non_other
+        else sorted(by_category.items(), key=lambda item: (-len(item[1]), item[0]))
+    )[:4]
+
+    overall_lang_counts = Counter(r.get("language") for r in public_repos if r.get("language"))
+
+    summary = (
+        f"{len(public_repos)} Public · {private_count} Private"
+        if private_count
+        else f"{len(public_repos)} Public Repos"
+    )
+
+    lines = [
+        "```mermaid",
+        "flowchart LR",
+        f'    DEV(["{_mermaid_escape(display_name)} · {summary}"])',
+        '    subgraph DOMAINS["Focus Domains"]',
+    ]
+
+    domain_edges = []
+    for i, (cat_key, items) in enumerate(selected_categories, start=1):
+        lines.append(f'        D{i}["{_mermaid_escape(cat_key)} · {len(items)}"]')
+        domain_edges.append(f"    DEV --> D{i}")
+    lines.append("    end")
+
+    lang_nodes = {}
+    lang_edges = []
+    for i, (_, items) in enumerate(selected_categories, start=1):
+        cat_langs = Counter(r.get("language") for r in items if r.get("language"))
+        if not cat_langs:
+            continue
+        top_lang = sorted(cat_langs.items(), key=lambda item: (-item[1], item[0].lower()))[0][0]
+        if top_lang not in lang_nodes:
+            lang_nodes[top_lang] = f"L{len(lang_nodes) + 1}"
+        lang_edges.append(f"    D{i} --> {lang_nodes[top_lang]}")
+
+    if lang_nodes:
+        lines.append('    subgraph STACK["Top Languages"]')
+        for lang, node_id in lang_nodes.items():
+            lines.append(f'        {node_id}["{_mermaid_escape(lang)} · {overall_lang_counts[lang]}"]')
+        lines.append("    end")
+
+    project_nodes = []
+    project_edges = []
+    for i, (_, items) in enumerate(selected_categories, start=1):
+        featured_list = _select_featured_repos(items, owner, limit=1)
+        if not featured_list:
+            continue
+        repo_name = featured_list[0].get("name") or "-"
+        project_nodes.append(f'        P{i}["{_mermaid_escape(repo_name)}"]')
+        project_edges.append(f"    D{i} -.-> P{i}")
+
+    if project_nodes:
+        lines.append('    subgraph PROJECTS["Latest Highlights"]')
+        lines.extend(project_nodes)
+        lines.append("    end")
+
+    lines.extend(domain_edges)
+    lines.extend(lang_edges)
+    lines.extend(project_edges)
+    lines.append("```")
+    return lines
+
+
 def generate_profile_readme(repos, profile=None, include_snake: bool | None = None):
     now_dt = datetime.now(timezone.utc)
     now = now_dt.strftime("%Y-%m-%d")
@@ -502,7 +591,7 @@ def generate_profile_readme(repos, profile=None, include_snake: bool | None = No
         f"&lines={encoded_typing})](https://github.com/{OWNER})"
     )
 
-    dashboard_url = f"https://{OWNER}.github.io/{REPO_NAME}/"
+    dashboard_url = f"https://{OWNER.lower()}.github.io/{REPO_NAME}/"
     source_url = f"https://github.com/{OWNER}/{REPO_NAME}"
     workflow_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions/workflows/update-dashboard.yml"
     profile_views = f"https://komarev.com/ghpvc/?username={OWNER}&style=for-the-badge&color=6d28d9&label=VIEWS"
@@ -616,6 +705,15 @@ def generate_profile_readme(repos, profile=None, include_snake: bool | None = No
         pct = round((count / public_total) * 100) if public_total else 0
         bar = _render_progress_bar(count, public_total)
         lines.append(f"| {CATEGORY_LABELS[cat_key]} | **{count}** | `{bar}` {pct}% |")
+
+    mermaid_block = build_profile_mermaid(display_name, public_repos, len(private_repos), OWNER)
+    if mermaid_block:
+        lines.extend([
+            "",
+            "### 🗺️ Ecosystem Map",
+            "",
+            *mermaid_block,
+        ])
 
     lines.extend([
         "",
@@ -736,13 +834,13 @@ def _get_profile_repo_default_branch(owner: str) -> str | None:
     return "main"
 
 
-def update_profile_readme(content: str):
+def update_profile_readme(content: str) -> str:
     if not PERSONAL_TOKEN:
         print("No PERSONAL_ACCESS_TOKEN set, skip profile update")
-        return
+        return "skipped (no PERSONAL_ACCESS_TOKEN)"
     branch = _get_profile_repo_default_branch(OWNER)
     if not branch:
-        return
+        return f"skipped (profile repo {OWNER}/{OWNER} not found)"
 
     url = f"https://api.github.com/repos/{OWNER}/{OWNER}/contents/README.md"
     resp = requests.get(url, headers=HEADERS, params={"ref": branch}, timeout=REQUEST_TIMEOUT)
@@ -761,8 +859,27 @@ def update_profile_readme(content: str):
     put = requests.put(url, headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
     if put.status_code in (200, 201):
         print(f"Profile README updated successfully on branch '{branch}'")
-    else:
-        print(f"Profile update failed: {put.status_code} - {put.text[:300]}")
+        return f"updated (branch '{branch}')"
+    print(f"Profile update failed: {put.status_code} - {put.text[:300]}")
+    return f"failed (HTTP {put.status_code})"
+
+
+def _write_step_summary(owner: str, public_count: int, private_count: int, profile_status: str, pages_url: str):
+    summary_path = os.getenv("GITHUB_STEP_SUMMARY")
+    if not summary_path:
+        return
+    lines = [
+        f"## Repos Dashboard Sync — `{owner}`",
+        "",
+        f"- **Target account**: `{owner}`",
+        f"- **Public repos**: **{public_count}**",
+        f"- **Private repos** (name + purpose only): **{private_count}**",
+        f"- **Profile README (`{owner}/{owner}`)**: {profile_status}",
+        f"- **Web Dashboard**: {pages_url}",
+        "",
+    ]
+    with open(summary_path, "a", encoding="utf-8") as f:
+        f.write("\n".join(lines))
 
 
 def write_dashboard_json(profile, public_repos, private_repos, output_path: str = "data/dashboard.json"):
@@ -792,14 +909,9 @@ def generate_readme(repos, profile=None):
     prof = sanitize_profile(profile, OWNER, public)
     display_name = (prof.get("name") or OWNER).strip()
 
-    workflow_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions/workflows/update-dashboard.yml"
-    actions_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions"
-    secrets_url = f"https://github.com/{OWNER}/{REPO_NAME}/settings/secrets/actions"
-    pages_settings_url = f"https://github.com/{OWNER}/{REPO_NAME}/settings/pages"
     token_url = "https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard"
-    pages_url = f"https://{OWNER}.github.io/{REPO_NAME}/"
+    pages_url = f"https://{OWNER.lower()}.github.io/{REPO_NAME}/"
     profile_view_url = f"https://github.com/{OWNER}/{OWNER}"
-    profile_actions_url = f"https://github.com/{OWNER}/{OWNER}/actions"
 
     cat_counts = Counter(categorize_key(r) for r in public_repos)
 
@@ -810,12 +922,17 @@ def generate_readme(repos, profile=None):
         "",
         f"[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)]({pages_url}) "
         f"[![View Profile](https://img.shields.io/badge/Profile_{_shields_escape(OWNER)}-1E293B?style=for-the-badge&logo=github&logoColor=white)]({profile_view_url}) "
-        f"[![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_url})",
+        "[![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](#setup-guide)",
         "",
         f"**Web Dashboard**: [{pages_url}]({pages_url})  ",
         f"**Updated**: `{now}`  ",
-        f"**Total**: **{total} repos** (`{public}` public · `{private}` private)  ",
-        "<sub>Forking this repo? Jump to the <a href=\"#setup-guide\">Setup Guide</a> below — use the <strong>Actions</strong> &amp; <strong>Settings</strong> tabs at the top of your fork for the first run, then all links auto-update to your repo.</sub>",
+        f"**Total**: **{total} repos** (`{public}` public · `{private}` private)",
+        "",
+        "> **Using this for your own GitHub Profile?**",
+        "> 1. Fork this repo (or click **Use this template**)",
+        "> 2. On **your fork's top bar**, open **Actions** → enable workflows",
+        "> 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your fork's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`",
+        "> 4. On **your fork's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)",
         "",
         "## ✨ Features",
         "",
@@ -875,20 +992,16 @@ def generate_readme(repos, profile=None):
         "<details>",
         "<summary><strong>🚀 Detailed Setup Guide (for forked users)</strong></summary>",
         "",
-        "> **Note for forked users**: For your very first setup, open the **Actions** and **Settings** tabs at the top of **your own fork** (GitHub Markdown strips relative links out of `/blob/...`). Once you run Step 4, every badge URL below automatically updates to your username and repository.",
+        "> **Note for forked users**: Always use the **Actions** and **Settings** tabs at the top of **your own fork** (never click links inside someone else's repo before running your own workflow). Running **Update Repos Dashboard** on your fork uses `${{ github.repository_owner }}`, so it automatically targets your account (`<your-username>`) and never the upstream repository.",
         "",
         "### 1. Enable GitHub Actions on your fork",
         "",
-        f"[![Open Actions](https://img.shields.io/badge/Open_Actions-blue?style=for-the-badge)]({actions_url})",
-        "",
-        "1. Open the **Actions** tab on your fork and click **I understand my workflows, go ahead and enable them**",
-        "2. Confirm **Update Repos Dashboard** is enabled in the left sidebar",
+        "1. On **your fork's top bar**, open the **Actions** tab and click **I understand my workflows, go ahead and enable them**",
+        "2. Confirm **Update Repos Dashboard** ([.github/workflows/update-dashboard.yml](.github/workflows/update-dashboard.yml)) is enabled in the left sidebar",
         "",
         "### 2. Enable GitHub Pages (before first run)",
         "",
-        f"[![Open Pages Settings](https://img.shields.io/badge/Open_Pages_Settings-blue?style=for-the-badge)]({pages_settings_url})",
-        "",
-        "1. Open **Settings → Pages** on your fork and under **Build and deployment**, select Source: **GitHub Actions**",
+        "1. On **your fork's top bar**, open **Settings → Pages** and under **Build and deployment**, select Source: **GitHub Actions**",
         "2. The `Deploy to GitHub Pages` workflow packages only `index.html` and `data/dashboard.json` into `_site/` (never exposing `scripts/` or `README.md`)",
         "",
         "### 3. (Optional) Enable Private Repos & Profile README Sync",
@@ -899,14 +1012,13 @@ def generate_readme(repos, profile=None):
         "   - Repository name must match **your exact GitHub username** · Visibility: **Public**",
         f"2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)]({token_url})",
         "   - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token",
-        f"3. **Save it as a repo secret**: [![Add Secret](https://img.shields.io/badge/Add_Secret-yellow?style=for-the-badge)]({secrets_url})",
-        "   - In **Settings → Secrets and variables → Actions** on your fork, add `PERSONAL_ACCESS_TOKEN` and paste your token",
+        "3. **Save it as a repo secret**: on **your fork's top bar**, open **Settings → Secrets and variables → Actions → New repository secret**",
+        "   - Name: `PERSONAL_ACCESS_TOKEN` · Value: paste your token",
         "",
-        "### 4. Run the dashboard workflow",
+        "### 4. Run the dashboard workflow on your fork",
         "",
-        f"[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)]({workflow_url})",
-        "",
-        "Click **Run workflow** → updates `README.md`, `data/dashboard.json`, and your profile README (auto-detecting `main`/`master`), then automatically deploys GitHub Pages.",
+        "1. On **your fork's top bar**, open **Actions → Update Repos Dashboard → Run workflow**",
+        "2. Because the workflow reads `${{ github.repository_owner }}`, it automatically updates **your** `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md` (auto-detecting `main`/`master`), then triggers GitHub Pages deployment.",
         "",
         "### 5. (Optional) Add Contribution Snake",
         "",
@@ -938,7 +1050,7 @@ def generate_readme(repos, profile=None):
         "          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}",
         "```",
         "",
-        f"2. Open your profile repo Actions (e.g. [Actions]({profile_actions_url})) → run **Generate Snake**, then re-run **Update Repos Dashboard**.",
+        "2. In your profile repo's **Actions** tab → run **Generate Snake**, then re-run **Update Repos Dashboard** on your fork.",
         "",
         "</details>",
         "",
@@ -969,4 +1081,11 @@ if __name__ == "__main__":
     print("data/dashboard.json updated")
 
     profile_content = generate_profile_readme(repos, profile)
-    update_profile_readme(profile_content)
+    profile_status = update_profile_readme(profile_content)
+    _write_step_summary(
+        OWNER,
+        len(public_repos),
+        len(private_repos),
+        profile_status,
+        f"https://{OWNER.lower()}.github.io/{REPO_NAME}/",
+    )
