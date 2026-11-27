@@ -8,6 +8,7 @@ import base64
 import json
 import os
 import re
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from urllib.parse import quote, urlparse
@@ -164,6 +165,7 @@ TECH_STACK_RULES = [
     ("Docker", {"docker", "dockerfile"}, ("docker",), "2496ED", "docker", "white"),
     ("PyTorch", {"pytorch"}, ("pytorch",), "EE4C2C", "pytorch", "white"),
     ("FastAPI", {"fastapi"}, ("fastapi",), "009688", "fastapi", "white"),
+    ("Chrome Extensions", {"chrome", "extension"}, ("chrome extension", "chrome/edge extension"), "4285F4", "googlechrome", "white"),
     ("Zalo Mini App", {"zalo", "miniapp"}, ("zalo", "mini app"), "0068FF", None, "white"),
 ]
 
@@ -171,6 +173,13 @@ TECH_STACK_RULES = [
 def _clean_description(desc) -> str:
     cleaned = " ".join((desc or "").split())
     return cleaned or "-"
+
+
+def _truncate(text: str, limit: int) -> str:
+    if len(text) <= limit:
+        return text
+    cut = text[: limit - 1].rsplit(" ", 1)[0].rstrip(" ,;:-—|/")
+    return (cut or text[: limit - 1]) + "…"
 
 
 def sanitize_private_repo(repo: dict) -> dict:
@@ -287,7 +296,9 @@ def get_repos(username: str):
         f"https://api.github.com/users/{username}/repos",
         {"per_page": 100, "sort": "updated", "type": "owner"},
     )
-    return repos or []
+    if repos is None:
+        raise RuntimeError(f"Failed to fetch repositories for {username}")
+    return repos
 
 
 def categorize_key(repo: dict) -> str:
@@ -430,7 +441,9 @@ def generate_profile_readme(repos, profile=None):
 
     prof = sanitize_profile(profile, OWNER, len(public_repos))
     display_name = (prof.get("name") or OWNER).strip()
-    bio = " ".join((prof.get("bio") or "").split())
+    raw_bio = " ".join((prof.get("bio") or "").split())
+    # Ignore bios that are just a bare URL (e.g. self-link to github.com/<owner>)
+    bio = "" if (not raw_bio or re.fullmatch(r"https?://\S+", raw_bio, flags=re.IGNORECASE)) else raw_bio
 
     cat_counts = Counter(categorize_key(r) for r in public_repos)
     top_domains = [
@@ -474,9 +487,14 @@ def generate_profile_readme(repos, profile=None):
     ]
     blog_url = _safe_http_url(prof.get("blog"))
     if blog_url:
-        top_badges.append(
-            f'<a href="{blog_url}"><img alt="Website" src="https://img.shields.io/badge/Website-0F172A?style=for-the-badge&logo=googlechrome&logoColor=white"></a>'
-        )
+        if "itch.io" in blog_url.lower():
+            top_badges.append(
+                f'<a href="{blog_url}"><img alt="Itch.io" src="https://img.shields.io/badge/Itch.io-FA5C5C?style=for-the-badge&logo=itchdotio&logoColor=white"></a>'
+            )
+        else:
+            top_badges.append(
+                f'<a href="{blog_url}"><img alt="Website" src="https://img.shields.io/badge/Website-0F172A?style=for-the-badge&logo=googlechrome&logoColor=white"></a>'
+            )
     if prof.get("twitter_username"):
         tw = prof["twitter_username"].lstrip("@")
         top_badges.append(
@@ -614,7 +632,7 @@ def generate_profile_readme(repos, profile=None):
             lang = r.get("language") or "-"
             updated = (r.get("updated_at") or "")[:10]
             cat = categorize(r)
-            desc = _clean_description(r.get("description"))[:90].replace("|", "/")
+            desc = _truncate(_clean_description(r.get("description")).replace("|", "/"), 90)
             lines.append(f"| [**{name}**]({url}){star_tag} | {cat} | `{lang}` | {desc} | `{updated}` |")
     else:
         lines.append("_No public repositories yet._")
@@ -714,12 +732,15 @@ def write_dashboard_json(profile, public_repos, private_repos, output_path: str 
         f.write("\n")
 
 
-def generate_readme(repos):
+def generate_readme(repos, profile=None):
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     public_repos, private_repos = split_repos(repos)
     private = len(private_repos)
     public = len(public_repos)
     total = private + public
+
+    prof = sanitize_profile(profile, OWNER, public)
+    display_name = (prof.get("name") or OWNER).strip()
 
     workflow_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions/workflows/update-dashboard.yml"
     token_url = "https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard"
@@ -731,12 +752,79 @@ def generate_readme(repos):
     profile_actions_url = f"https://github.com/{OWNER}/{OWNER}/actions"
     actions_url = f"https://github.com/{OWNER}/{REPO_NAME}/actions"
 
+    cat_counts = Counter(categorize_key(r) for r in public_repos)
+
     lines = [
-        f"# 📊 GitHub Repos Dashboard - {OWNER}",
+        f"# 📊 GitHub Repos Dashboard — {display_name}",
         "",
-        "## 🚀 Detailed Setup Guide",
+        "Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data/dashboard.json`), minimal private-repo listing (name + purpose only), and adaptive light/dark Profile README sync.",
         "",
-        "> **Note for forked users**: After forking, run the workflow on your fork so all links and content update to your username.",
+        f"[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)]({pages_url}) "
+        f"[![View Profile](https://img.shields.io/badge/Profile_{_shields_escape(OWNER)}-1E293B?style=for-the-badge&logo=github&logoColor=white)]({profile_view_url}) "
+        f"[![Run Sync Workflow](https://img.shields.io/badge/Run_Workflow-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)]({workflow_url})",
+        "",
+        f"**Web Dashboard**: [{pages_url}]({pages_url})  ",
+        f"**Updated**: `{now}`  ",
+        f"**Total**: **{total} repos** (`{public}` public · `{private}` private)",
+        "",
+        "## ✨ Features",
+        "",
+        "- **Unified Categorization**: `scripts/update_dashboard.py` and `index.html` share identical priority rules (`topics → keyword tokens → language → Other`), keeping `README.md` and Web UI 100% consistent.",
+        "- **Zero Rate-Limit Snapshot**: GitHub Actions publishes `data/dashboard.json` alongside `README.md` so visitors load the dashboard without hitting GitHub's 60 req/hr unauthenticated limit.",
+        "- **Privacy-Safe Private Repos**: When `PERSONAL_ACCESS_TOKEN` is configured, private repos are fetched via `/user/repos?affiliation=owner` and stripped down to **name and purpose (`tác dụng`) only** — no links, languages, stars, or timestamps.",
+        "- **Hardened Web UI & Scoped Pages Deploy**: `index.html` renders strictly with safe DOM APIs (zero `innerHTML` / inline handlers) and `pages.yml` deploys only `_site/` (`index.html` + `data/dashboard.json`).",
+        "- **Adaptive Profile README**: Automatically syncs `{owner}/{owner}/README.md` with light/dark `<picture>` cards, dynamic language & tech-stack badges, project highlights, and contribution snake.",
+        "",
+        "## 📈 Domain Breakdown (Public Repos)",
+        "",
+        "| Domain | Public Repos | Share |",
+        "|--------|-------------:|-------|",
+    ]
+
+    for cat_key, count in sorted(cat_counts.items(), key=lambda x: (-x[1], x[0])):
+        pct = round((count / public) * 100) if public else 0
+        bar = _render_progress_bar(count, public)
+        lines.append(f"| {CATEGORY_LABELS[cat_key]} | **{count}** | `{bar}` {pct}% |")
+
+    lines.append("")
+
+    if private_repos:
+        lines.append(f"## 🔒 Private Repos ({len(private_repos)})")
+        lines.append("")
+        lines.append("| Repo | Tác dụng |")
+        lines.append("|------|----------|")
+        for r in private_repos:
+            name = r["name"].replace("|", "/")
+            desc = r["description"][:200].replace("|", "/")
+            lines.append(f"| **{name}** | {desc} |")
+        lines.append("")
+
+    groups = defaultdict(list)
+    for r in public_repos:
+        groups[categorize(r)].append(r)
+
+    for cat, items in sorted(groups.items(), key=lambda item: (-len(item[1]), item[0])):
+        lines.append(f"## {cat} ({len(items)})")
+        lines.append("")
+        lines.append("| Repo | Language | Updated | Stars | Description |")
+        lines.append("|------|----------|---------|------:|-------------|")
+        for r in sorted(items, key=lambda x: x.get("updated_at") or "", reverse=True)[:30]:
+            name = r["name"]
+            lang = r.get("language") or "-"
+            updated = (r.get("updated_at") or "")[:10]
+            stars = r.get("stargazers_count", 0)
+            desc = _truncate(_clean_description(r.get("description")).replace("|", "/"), 88)
+            url = r["html_url"]
+            lines.append(f"| [**{name}**]({url}) | `{lang}` | `{updated}` | {stars} | {desc} |")
+        lines.append("")
+
+    lines.extend([
+        "---",
+        "",
+        "<details>",
+        "<summary><strong>🚀 Detailed Setup Guide (for forked users)</strong></summary>",
+        "",
+        "> **Note for forked users**: After forking, run the workflow on your fork so all links, snapshot data, and profile content update to your username.",
         "",
         "### 1. Enable the workflow (required on forks)",
         "",
@@ -757,7 +845,7 @@ def generate_readme(repos):
         f"[![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)]({token_url})",
         "",
         "- Select **Generate new token (classic)**",
-        "- Check the **`repo`** scope",
+        "- Check the **`repo`** scope (enables syncing your profile README and pulling private repos as name + purpose only)",
         "- Copy the token immediately",
         "",
         "### 4. Add the token as a secret",
@@ -778,7 +866,7 @@ def generate_readme(repos):
         "",
         "### 6. (Optional) Add Contribution Snake",
         "",
-        "To show the animated contribution snake on your profile:",
+        "To show the animated contribution snake on your profile (both light and dark themes):",
         "",
         f"1. Go to your profile repo: [https://github.com/{OWNER}/{OWNER}](https://github.com/{OWNER}/{OWNER})",
         "2. Create file `.github/workflows/snake.yml` with this content:",
@@ -813,58 +901,15 @@ def generate_readme(repos):
         "",
         f"[![Run Workflow](https://img.shields.io/badge/Run_Workflow-success?style=for-the-badge)]({workflow_url})",
         "",
-        "This updates `README.md`, `data/dashboard.json`, and your profile README.",
+        "This updates `README.md`, `data/dashboard.json`, and your profile README, then triggers GitHub Pages deployment.",
         "",
         "### 8. View your profile",
         "",
         f"[![View Profile](https://img.shields.io/badge/View_Profile-blue?style=for-the-badge)]({profile_view_url})",
         "",
-        "---",
+        "</details>",
         "",
-        f"**Web Dashboard**: [{pages_url}]({pages_url})",
-        "",
-        f"**Updated**: {now}  ",
-        f"**Total**: {total} repos ({private} private / {public} public)",
-        "",
-        "---",
-        ""
-    ]
-
-    if private_repos:
-        lines.append(f"## 🔒 Private Repos ({len(private_repos)})")
-        lines.append("")
-        lines.append("| Repo | Tác dụng |")
-        lines.append("|------|----------|")
-        for r in private_repos:
-            name = r["name"].replace("|", "/")
-            desc = r["description"][:200].replace("|", "/")
-            lines.append(f"| **{name}** | {desc} |")
-        lines.append("")
-
-    groups = defaultdict(list)
-    for r in public_repos:
-        groups[categorize(r)].append(r)
-
-    for cat in sorted(groups.keys()):
-        lines.append(f"## {cat} ({len(groups[cat])})")
-        lines.append("")
-        lines.append("| Repo | Language | Updated | Stars | Visibility | Description |")
-        lines.append("|------|----------|---------|-------|------------|-------------|")
-        for r in sorted(groups[cat], key=lambda x: x.get("updated_at") or "", reverse=True)[:30]:
-            name = r["name"]
-            lang = r.get("language") or "-"
-            updated = (r.get("updated_at") or "")[:10]
-            stars = r.get("stargazers_count", 0)
-            vis = "🌐"
-            desc = _clean_description(r.get("description"))[:60].replace("|", "/")
-            url = r["html_url"]
-            lines.append(f"| [{name}]({url}) | {lang} | {updated} | {stars} | {vis} | {desc} |")
-        lines.append("")
-
-    lines.extend([
-        "---",
-        "",
-        "*Generated automatically. Run the workflow to refresh.*"
+        "*Generated automatically by `scripts/update_dashboard.py`. Run the workflow to refresh.*",
     ])
     return "\n".join(lines)
 
@@ -873,11 +918,16 @@ if __name__ == "__main__":
     print(f"Generating dashboard for: {OWNER}")
     print(f"Using personal token: {bool(PERSONAL_TOKEN)}")
     profile = get_profile(OWNER)
-    repos = get_repos(OWNER)
+    try:
+        repos = get_repos(OWNER)
+    except RuntimeError as exc:
+        print(f"Aborting update to preserve existing files: {exc}", file=sys.stderr)
+        sys.exit(1)
+
     public_repos, private_repos = split_repos(repos)
     print(f"Found {len(repos)} repositories ({len(public_repos)} public, {len(private_repos)} private)")
 
-    readme = generate_readme(repos)
+    readme = generate_readme(repos, profile)
     with open("README.md", "w", encoding="utf-8") as f:
         f.write(readme)
     print("README.md updated")
