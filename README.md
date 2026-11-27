@@ -2,14 +2,14 @@
 
 Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data/dashboard.json`), minimal private-repo listing (name + purpose only), and adaptive light/dark Profile README sync.
 
-[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://htl2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/HTL2910/github-repos-dashboard/generate)
+[![Open Web Dashboard](https://img.shields.io/badge/Open_Web_Dashboard-2563EB?style=for-the-badge&logo=githubpages&logoColor=white)](https://htl2910.github.io/github-repos-dashboard/) [![View Profile](https://img.shields.io/badge/Profile_HTL2910-1E293B?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HTL2910/HTL2910) [![Use For Your Profile](https://img.shields.io/badge/Use_For_Your_Profile-16A34A?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/new?template_owner=HTL2910&template_name=github-repos-dashboard&name=github-repos-dashboard&description=Automated%20GitHub%20repos%20dashboard%20and%20dynamic%20profile%20README&visibility=public)
 
 **Web Dashboard**: [https://htl2910.github.io/github-repos-dashboard/](https://htl2910.github.io/github-repos-dashboard/)  
-**Updated**: `2026-11-27 10:14 UTC`  
+**Updated**: `2026-11-27 10:18 UTC`  
 **Total**: **78 repos** (`43` public · `35` private)
 
 > **Using this for your own GitHub Profile?**
-> 1. [Use this template](https://github.com/HTL2910/github-repos-dashboard/generate) (or [Fork this repo](https://github.com/HTL2910/github-repos-dashboard/fork))
+> 1. [Use this template](https://github.com/new?template_owner=HTL2910&template_name=github-repos-dashboard&name=github-repos-dashboard&description=Automated%20GitHub%20repos%20dashboard%20and%20dynamic%20profile%20README&visibility=public) (or [Fork this repo](https://github.com/HTL2910/github-repos-dashboard/fork))
 > 2. On **your copy's top bar**, open **Actions** → enable workflows *(already enabled if created from template)*
 > 3. *(To sync your GitHub Profile & private repos)* Create public repo `<your-username>/<your-username>`, create a Classic PAT (`repo` scope), and save it in **your repo's Settings → Secrets and variables → Actions** as `PERSONAL_ACCESS_TOKEN`
 > 4. On **your repo's top bar**, open **Actions → Update Repos Dashboard → Run workflow** (automatically updates your `README.md`, `data/dashboard.json`, and `<your-username>/<your-username>/README.md`)
@@ -156,7 +156,7 @@ Automated GitHub repository catalog, zero-rate-limit static Web Dashboard (`data
 
 Skip this step if you only want a public repos dashboard. To include private repos (name + purpose only) and auto-update your GitHub profile:
 
-1. **Create your profile repo** (if you don't have one yet): [![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new)
+1. **Create your profile repo** (if you don't have one yet): [![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new?description=GitHub%20Profile%20README&visibility=public)
    - Repository name must match **your exact GitHub username** · Visibility: **Public**
 2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)](https://github.com/settings/tokens/new?scopes=repo&description=github-repos-dashboard)
    - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token

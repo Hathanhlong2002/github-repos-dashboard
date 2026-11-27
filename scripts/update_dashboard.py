@@ -919,8 +919,12 @@ def generate_readme(repos, profile=None):
         None,
     )
     is_template = bool(current_repo and current_repo.get("is_template"))
+    template_desc = quote("Automated GitHub repos dashboard and dynamic profile README", safe="")
     use_repo_url = (
-        f"https://github.com/{OWNER}/{REPO_NAME}/generate"
+        f"https://github.com/new?template_owner={quote(OWNER, safe='')}"
+        f"&template_name={quote(REPO_NAME, safe='')}"
+        f"&name={quote(REPO_NAME, safe='')}"
+        f"&description={template_desc}&visibility=public"
         if is_template
         else f"https://github.com/{OWNER}/{REPO_NAME}/fork"
     )
@@ -1025,7 +1029,7 @@ def generate_readme(repos, profile=None):
         "",
         "Skip this step if you only want a public repos dashboard. To include private repos (name + purpose only) and auto-update your GitHub profile:",
         "",
-        "1. **Create your profile repo** (if you don't have one yet): [![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new)",
+        "1. **Create your profile repo** (if you don't have one yet): [![Create Profile Repo](https://img.shields.io/badge/Create_Profile_Repo-purple?style=for-the-badge)](https://github.com/new?description=GitHub%20Profile%20README&visibility=public)",
         "   - Repository name must match **your exact GitHub username** · Visibility: **Public**",
         f"2. **Create a Classic PAT**: [![Get Token](https://img.shields.io/badge/Get_Token-orange?style=for-the-badge)]({token_url})",
         "   - Select **Generate new token (classic)**, check the **`repo`** scope, and copy the token",
